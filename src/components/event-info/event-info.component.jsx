@@ -85,13 +85,6 @@ const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colo
             <Text dangerouslySetInnerHTML={{ __html: description.replace(/<a\b([^>]*)>(.*?)<\/a>/g, '<a style="font-size: inherit; text-decoration: underline 2px #e23734; text-underline-offset: 2px;" $1>$2</a>') }} />
           </OverflowWrapper>
         )}
-        <Flex>
-          <Text style={{marginTop: "1.5rem", fonSize:"19px", textDecoration:"underline 2px #e23734", textUnderlineOffset:"5px"}}>
-            <a style={{color:"#e23734", fontWeight:400}} href="#" onClick={handleDownload}>
-              ical Download
-            </a>
-          </Text>
-        </Flex>
       </ContentWrapper>
     </Wrapper>
   );
