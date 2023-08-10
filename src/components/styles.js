@@ -39,6 +39,13 @@ const textStyling = (props) => css`
   }
 `
 
+const tileStyling = (props) => css`
+  color: ${props.theme.colors.dark};
+  font-weight: ${props.theme.fontWeights.black};
+  line-height: ${props.theme.lineHeights.base};
+   font-size: ${props.theme.fontSizes[3]};
+`
+
 const imageStyling = (props) => css`
   width: 100%;
 `
@@ -48,3 +55,4 @@ export const H1Title = styled.h1(titleStyling);
 export const LargeH1Title = styled.h1(largeTitleStyling);
 export const PText = styled.p(textStyling);
 export const SpanText = styled.p(textStyling);
+export const Title = styled.h4(tileStyling);

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Flex } from "reflexbox";
-import { H1Title, PText, LightText } from "../components/styles";
+import { H1Title, PText, LightText, Title } from "../components/styles";
 import getData from "../helpers/get-data";
 import { InfoCard } from "../components/info-card";
 import { Loading } from "../components/loading";
@@ -22,14 +22,17 @@ const Charity = () => {
     :
    <Box maxWidth="100rem">
       {(charity && charity.acf) && <Box marginBottom="8rem">
+        <H1Title>
+          LIVERY AND CHARITY ROLES        
+        </H1Title>
         <PText>
           {charity.acf.description}
-        </PText>
+        </PText> 
       </Box>}
-      <a target="_blank" rel="noreferrer" href="https://www.furnituremakers.org.uk"><PText>furnituremakers.org.uk</PText></a>
+      
       {(charity && charity.acf) && charity.acf.contact_office.map(({office, phone, contacts}, i) => <Box width="100%" marginBottom="5rem">
         <Flex alignItems="center" flexWrap="wrap" marginBottom="2rem">
-          {office && <Box marginRight="3rem"><H1Title>{office}</H1Title></Box>}
+          {office && <Box marginRight="2rem"><Title>{office}</Title></Box>}
           {phone && <LightText>{phone}</LightText>}
         </Flex>
         {contacts && <Flex width="100%" flexWrap="wrap">

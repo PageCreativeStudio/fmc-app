@@ -83,7 +83,7 @@ const Sidebar = ({theme, left, onOutsideClick, onMenuClick}) => {
                 <Box marginTop="0.1rem" marginRight={theme.spacing[0]}>
                   {committeesIcon}
                 </Box>
-                <HiddenSmall>Livery and Charity roles</HiddenSmall>
+                <HiddenSmall>Livery and Charity Roles</HiddenSmall>
               </NavItem>
             </li>
             <li>
