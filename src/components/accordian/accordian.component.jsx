@@ -8,6 +8,7 @@ import plus from '../../assets/svgs/plus';
 import { InfoPopup } from '../info-popup';
 import { Events, EventsWrapper, Link, SmallText,Text, TextBold, Circle } from '../info-card/info-card.styles';
 import formatDate from '../../helpers/format-date';
+import moment from 'moment';
 
 const Accordian = ({theme, title, children, width="100%", active = false, infoBox, events}) => {
 
@@ -36,9 +37,8 @@ const Accordian = ({theme, title, children, width="100%", active = false, infoBo
   useEffect(() => {
     if(!filteredEvents) return
     const calendarInstace = window.ics();
-    console.log(filteredEvents)
     filteredEvents.forEach(event => {
-      calendarInstace.addEvent(event.acf.title, event.acf.description, "", `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`);
+      calendarInstace.addEvent(event.acf.title, event.acf.description, "", `${moment(`${event.acf.date_from}${event.acf.time ? ` ${event.acf.time}` : ' 00:00'}`, 'YYYY-MM-DD HH:mm A')}`, `${event.acf.date_to ? moment(`${event.acf.date_to}${event.acf.time_end ? ` ${event.acf.time_end}` : ' 00:00'}`, 'YYYY-MM-DD HH:mm A') : moment(`${event.acf.date_from}${event.acf.time_end ? ` ${event.acf.time_end}` : ' 00:00'}`, 'YYYY-MM-DD HH:mm A')}`);
     });
     setCalendar(calendarInstace)
   }, [filteredEvents])
