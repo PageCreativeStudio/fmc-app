@@ -9,30 +9,30 @@ const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colo
     if (!date) {
       return "";
     }
-    const formattedDate = date.toISOString().replace(/[-:.]/g, "").replace(/000Z$/, "Z");
-    if (!time) {
-      // If no time is provided, return the formatted date without any time
-      return formattedDate.substring(0, 8);
-    }
     const dateObj = new Date(date);
-    // Extract hours, minutes, and AM/PM from the time
-    const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
-    if (!timeParts) {
-      // If time format doesn't match, return the formatted date without any time
-      return formattedDate.substring(0, 8);
+    // Set the time to 12:00 PM (noon) if no time is available
+    if (!time) {
+      dateObj.setHours(12, 0, 0, 0);
+    } else {
+      // Extract hours, minutes, and AM/PM from the time
+      const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
+      if (!timeParts) {
+        // If time format doesn't match, return the formatted date without any time
+        return dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z").substring(0, 8);
+      }
+      let hours = parseInt(timeParts[1], 10);
+      const minutes = parseInt(timeParts[2], 10);
+      const period = timeParts[3].toLowerCase();
+      // Adjust hours if PM and not 12 PM
+      if (period === "pm" && hours !== 12) {
+        hours += 12;
+      }
+      // Set the time
+      dateObj.setHours(hours, minutes);
     }
-    let hours = parseInt(timeParts[1], 10);
-    const minutes = parseInt(timeParts[2], 10);
-    const period = timeParts[3].toLowerCase();
-    // Adjust hours if PM and not 12 PM
-    if (period === "pm" && hours !== 12) {
-      hours += 12;
-    }
-    // Set the time one hour before
-    dateObj.setHours(hours - 0, minutes);
-    // Format the time as "110000" without ":"
-    const formattedTime = dateObj.toISOString().substring(11, 19).replace(/:/g, "");
-    return `${formattedDate.substring(0, 8)}T${formattedTime}Z`;
+    // Format the date and time as "YYYYMMDDTHHMMSSZ"
+    const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
+    return formattedDate;
   };
 
 
@@ -44,7 +44,6 @@ const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colo
 VERSION:2.0
 BEGIN:VEVENT
 SUMMARY:${title}
-DESCRIPTION:${description}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
 END:VEVENT
