@@ -39,7 +39,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colo
   const generateCalendarData = (startDate, endDate) => {
     const formattedStartDate = formatICSDate(startDate, time);
     const formattedEndDate = formatICSDate(endDate, time);
-
+  
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -48,9 +48,10 @@ SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
 END:VEVENT
-END:VCALENDAR
-  `.trim();
-    return `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
+END:VCALENDAR`.trim();
+  
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    return window.URL.createObjectURL(blob);
   };
 
   const handleDownload = () => {
@@ -104,17 +105,20 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    // Generate the .ics file with the new dates (without time)
-    const calendarData = generateCalendarData(
+    const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime)
     );
-
-    const element = document.createElement("a");
-    element.href = calendarData;
+  
+    const element = document.createElement('a');
+    element.href = calendarDataUrl;
     element.download = `${title}.ics`;
     document.body.appendChild(element);
     element.click();
+    document.body.removeChild(element);
+  
+    // Release the Blob URL
+    window.URL.revokeObjectURL(calendarDataUrl);
   };
 
 
