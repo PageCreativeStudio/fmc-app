@@ -42,6 +42,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colo
 
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
+PRODID:CALENDAR
 BEGIN:VEVENT
 SUMMARY:${title}
 DTSTART:${formattedStartDate}
@@ -167,7 +168,7 @@ END:VCALENDAR
           </Title>
         )}
         {description && (
-          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "30rem" : "auto"}>
+          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "8rem" : "auto"}>
             <Text dangerouslySetInnerHTML={{ __html: description.replace(/<a\b([^>]*)>(.*?)<\/a>/g, '<a style="font-size: inherit; text-decoration: underline 2px #e23734; text-underline-offset: 2px;" $1>$2</a>') }} />
           </OverflowWrapper>
         )}
