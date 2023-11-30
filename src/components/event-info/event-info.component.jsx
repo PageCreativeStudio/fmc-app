@@ -113,9 +113,9 @@ END:VCALENDAR`.trim();
     const element = document.createElement('a');
     element.href = calendarDataUrl;
     element.download = `${title}.ics`;
-    document.body.appendChild(element);
+  
+    // Trigger the click event directly for user interaction
     element.click();
-    document.body.removeChild(element);
   
     // Release the Blob URL
     window.URL.revokeObjectURL(calendarDataUrl);
