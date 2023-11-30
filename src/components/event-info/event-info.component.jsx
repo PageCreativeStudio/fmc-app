@@ -110,15 +110,17 @@ END:VCALENDAR`.trim();
       new Date(endDateStringWithoutTime)
     );
   
-    const element = document.createElement('a');
-    element.href = calendarDataUrl;
-    element.download = `${title}.ics`;
+    // Open a new window with the data URI
+    const newWindow = window.open(calendarDataUrl, '_blank');
+    if (!newWindow) {
+      // If the new window is blocked (common on iOS), provide instructions to the user
+      alert('Please allow pop-ups for this site to download the file.');
+    }
   
-    // Trigger the click event directly for user interaction
-    element.click();
-  
-    // Release the Blob URL
-    window.URL.revokeObjectURL(calendarDataUrl);
+    // Release the Blob URL after a short delay to allow the download to start
+    setTimeout(() => {
+      window.URL.revokeObjectURL(calendarDataUrl);
+    }, 1000);
   };
 
 
