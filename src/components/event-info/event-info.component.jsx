@@ -3,17 +3,16 @@ import { Flex } from "reflexbox";
 import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, BackArrow } from "./event-info.styles";
 import { withTheme } from "@emotion/react";
 
-const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colour = theme.colors.primary, onClick }) => {
+const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
 
   const formatICSDate = (date, time) => {
     if (!date) {
       return "";
     }
     const dateObj = new Date(date);
-    // Set the time to 12:00 PM (noon) if no time is available
-    if (!time) {
-      dateObj.setHours(12, 0, 0, 0);
-    } else {
+
+    // Check if time is available
+    if (time) {
       // Extract hours, minutes, and AM/PM from the time
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (!timeParts) {
@@ -30,16 +29,18 @@ const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colo
       // Set the time
       dateObj.setHours(hours, minutes);
     }
+
     // Format the date and time as "YYYYMMDDTHHMMSSZ"
     const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
     return formattedDate;
   };
+  
 
 
   const generateCalendarData = (startDate, endDate) => {
     const formattedStartDate = formatICSDate(startDate, time);
     const formattedEndDate = formatICSDate(endDate, time);
-  
+
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -48,11 +49,16 @@ SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
 END:VEVENT
-END:VCALENDAR`.trim();
+END:VCALENDAR
+  `.trim();
   
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
   };
+  
+  
+  
+  
 
   const handleDownload = () => {
     if (!date && !dateEnd) {
@@ -107,7 +113,9 @@ END:VCALENDAR`.trim();
 
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
-      new Date(endDateStringWithoutTime)
+      new Date(endDateStringWithoutTime),
+      time, 
+      timeEnd 
     );
   
     // Open a new window with the data URI
@@ -162,6 +170,7 @@ END:VCALENDAR`.trim();
           <Text>
             {date && date}
             {time && <>, {time}</>}
+            {timeEnd && <>, {timeEnd}</>}
             {dateEnd && <> - {dateEnd}</>}
           </Text>
         )}
