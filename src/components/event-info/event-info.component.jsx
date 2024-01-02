@@ -36,7 +36,6 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
   };
   
 
-
   const generateCalendarData = (startDate, endDate) => {
     const formattedStartDate = formatICSDate(startDate, time);
     const formattedEndDate = formatICSDate(endDate, time);
@@ -55,8 +54,6 @@ END:VCALENDAR
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
   };
-  
-  
   
   
 
