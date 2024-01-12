@@ -32,6 +32,7 @@ const Accordian = ({theme, title, children, width="100%", active = false, infoBo
       return currentdate.getTime() <= new Date(event.acf.date_from).getTime()
     }))
   }, [events])
+  
 
   useEffect(() => {
     if(!filteredEvents) return
@@ -42,11 +43,36 @@ const Accordian = ({theme, title, children, width="100%", active = false, infoBo
     });
     setCalendar(calendarInstace)
   }, [filteredEvents])
+
   
   const onDownloadClick = () => {
-    if (!calendar) return
-    calendar.download(`${title} FMC Events`);
-  }
+    if (!calendar) return;
+  
+    const icsData = calendar.download();
+  
+    // Modify the ICS content by moving VERSION before PRODID
+    const modifiedIcsContent = modifyICSContent(icsData);
+  
+    // Create a Blob from the modified content
+    const blob = new Blob([modifiedIcsContent], { type: 'text/calendar;charset=utf-8' });
+  
+    // Create a link and trigger the download
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${title} FMC Events.ics`;
+    link.click();
+  };
+  
+  const modifyICSContent = (icsContent) => {
+    // Modify the ICS content by moving VERSION before PRODID
+    return icsContent.replace(
+      /BEGIN:VCALENDAR([\s\S]*?)PRODID:([\s\S]*?)Calendar([\s\S]*?)VERSION:2.0([\s\S]*?)END:VCALENDAR/,
+      'BEGIN:VCALENDAR$1VERSION:2.0\nPRODID:Calendar$3$4END:VCALENDAR'
+    );
+  };
+  
+
+  
 
   return (
     <Box onClick={() => showCalendar && setShowCalendar(false)} marginBottom={theme.spacing[1]} width={width}>
