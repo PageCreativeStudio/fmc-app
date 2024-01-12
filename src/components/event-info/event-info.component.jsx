@@ -3,16 +3,17 @@ import { Flex } from "reflexbox";
 import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, BackArrow } from "./event-info.styles";
 import { withTheme } from "@emotion/react";
 
-const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
+const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colour = theme.colors.primary, onClick }) => {
 
   const formatICSDate = (date, time) => {
     if (!date) {
       return "";
     }
     const dateObj = new Date(date);
-
-    // Check if time is available
-    if (time) {
+    // Set the time to 12:00 PM (noon) if no time is available
+    if (!time) {
+      dateObj.setHours(12, 0, 0, 0);
+    } else {
       // Extract hours, minutes, and AM/PM from the time
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (!timeParts) {
@@ -29,12 +30,11 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       // Set the time
       dateObj.setHours(hours, minutes);
     }
-
     // Format the date and time as "YYYYMMDDTHHMMSSZ"
     const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
     return formattedDate;
   };
-  
+
 
   const generateCalendarData = (startDate, endDate) => {
     const formattedStartDate = formatICSDate(startDate, time);
@@ -42,7 +42,6 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
 
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:CALENDAR
 BEGIN:VEVENT
 SUMMARY:${title}
 DTSTART:${formattedStartDate}
@@ -50,12 +49,8 @@ DTEND:${formattedEndDate}
 END:VEVENT
 END:VCALENDAR
   `.trim();
-  
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
+    return `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
   };
-  
-  
 
   const handleDownload = () => {
     if (!date && !dateEnd) {
@@ -108,24 +103,17 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    const calendarDataUrl = generateCalendarData(
+    // Generate the .ics file with the new dates (without time)
+    const calendarData = generateCalendarData(
       new Date(startDateStringWithoutTime),
-      new Date(endDateStringWithoutTime),
-      time, 
-      timeEnd 
+      new Date(endDateStringWithoutTime)
     );
-  
-    // Open a new window with the data URI
-    const newWindow = window.open(calendarDataUrl, '_blank');
-    if (!newWindow) {
-      // If the new window is blocked (common on iOS), provide instructions to the user
-      alert('Please allow pop-ups for this site to download the file.');
-    }
-  
-    // Release the Blob URL after a short delay to allow the download to start
-    setTimeout(() => {
-      window.URL.revokeObjectURL(calendarDataUrl);
-    }, 1000);
+
+    const element = document.createElement("a");
+    element.href = calendarData;
+    element.download = `${title}.ics`;
+    document.body.appendChild(element);
+    element.click();
   };
 
 
@@ -167,7 +155,6 @@ END:VCALENDAR
           <Text>
             {date && date}
             {time && <>, {time}</>}
-            {timeEnd && <>, {timeEnd}</>}
             {dateEnd && <> - {dateEnd}</>}
           </Text>
         )}
