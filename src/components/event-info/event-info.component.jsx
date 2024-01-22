@@ -3,6 +3,7 @@ import { Flex } from "reflexbox";
 import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, BackArrow } from "./event-info.styles";
 import { withTheme } from "@emotion/react";
 
+
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
 
   const formatICSDate = (date, time) => {
@@ -59,7 +60,6 @@ END:VCALENDAR
   };
   
   
-  
 
   const handleDownload = () => {
     if (!date && !dateEnd) {
@@ -67,7 +67,6 @@ END:VCALENDAR
       return;
     }
   
-    // Parse the event date and dateEnd strings in the "Sunday 10th September 2023" format
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
   
@@ -112,23 +111,42 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
   
-    const { filename, calendarData } = generateCalendarData(
-      new Date(startDateStringWithoutTime),
-      new Date(endDateStringWithoutTime),
-      time,
-      timeEnd
-    );
+    // Format the data according to your custom structure
+    const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
+    const formattedStartDate = formatICSDate(startDateStringWithoutTime, time);
+    const formattedEndDate = formatICSDate(endDateStringWithoutTime, timeEnd);
+    const descriptionText = description || "";
   
-    // Create a Blob with the calendar data
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    const customCalendarData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:CALENDAR
+BEGIN:VEVENT
+SUMMARY:${eventTitle}
+DTSTART:${formattedStartDate}
+DTEND:${formattedEndDate}
+DESCRIPTION:${descriptionText}
+END:VEVENT
+END:VCALENDAR`;
   
-    // Create a link element and trigger the download
-    const downloadLink = document.createElement('a');
-    downloadLink.href = window.URL.createObjectURL(blob);
-    downloadLink.download = filename;
+    // Create a Blob with the custom data
+    const customBlob = new Blob([customCalendarData], { type: 'text/calendar;charset=utf-8' });
   
-    // Trigger the download by clicking the link
-    downloadLink.click();
+    // Create a download link for the custom data
+    const customLink = document.createElement('a');
+    customLink.href = window.URL.createObjectURL(customBlob);
+    customLink.setAttribute('download', `${eventTitle}_FMC_Events_Custom.ics`);
+    document.body.appendChild(customLink);
+  
+    // Trigger the download for the custom data
+    customLink.click();
+  
+    // Remove the link for the custom data from the document
+    document.body.removeChild(customLink);
+  
+    // Now, use window.ics() for downloading as well
+    const calendarInstance = window.ics();
+    calendarInstance.addEvent(title, description || "", "", new Date(startDateStringWithoutTime), new Date(endDateStringWithoutTime));
+    calendarInstance.download(`${eventTitle}_FMC_Events.ics`);
   };
   
 
