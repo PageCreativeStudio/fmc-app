@@ -40,6 +40,9 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const formattedStartDate = formatICSDate(startDate, time);
     const formattedEndDate = formatICSDate(endDate, time);
   
+    const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
+    const filename = `${eventTitle}.ics`;
+  
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -52,9 +55,10 @@ END:VEVENT
 END:VCALENDAR
     `.trim();
   
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
+    return { filename, calendarData };
   };
+  
+  
   
 
   const handleDownload = () => {
@@ -108,25 +112,25 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    const calendarDataUrl = generateCalendarData(
+    const { filename, calendarData } = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
-      time, 
-      timeEnd 
+      time,
+      timeEnd
     );
+  
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    const calendarDataUrl = window.URL.createObjectURL(blob);
   
     const downloadLink = document.createElement('a');
     downloadLink.href = calendarDataUrl;
-    downloadLink.target = '_blank'; // Open in a new window/tab
+    downloadLink.target = '_blank';
+    downloadLink.download = filename;
+  
     document.body.appendChild(downloadLink);
-  
-    // Trigger the download by opening a new window
-    window.open(downloadLink.href, '_blank');
-  
-    // Remove the temporary link element from the document
+    downloadLink.click();
     document.body.removeChild(downloadLink);
   
-    // Release the Blob URL after a short delay to allow the download to start
     setTimeout(() => {
       window.URL.revokeObjectURL(calendarDataUrl);
     }, 1000);
