@@ -117,9 +117,9 @@ END:VCALENDAR
   
     const downloadLink = document.createElement('a');
     downloadLink.href = calendarDataUrl;
-    
+  
     // Set the download attribute with the desired filename
-    downloadLink.download = `${title}.ics`;
+    downloadLink.setAttribute('download', `${title}.ics`);
   
     // Append the link to the document body
     document.body.appendChild(downloadLink);
