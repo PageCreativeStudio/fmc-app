@@ -80,16 +80,6 @@ END:VCALENDAR
       );
     };
   
-    const download = function (filename, data) {
-      const blob = new Blob([data], { type: 'text/calendar;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-  
     return {
       addEvent: function (subject, description, location, begin, end) {
         lines.push('BEGIN:VEVENT');
@@ -105,12 +95,20 @@ END:VCALENDAR
         lines.push('PRODID:CALENDAR');
         lines.push('VERSION:2.0');
         lines.push('END:VCALENDAR');
-        const data = lines.join('\n');
-        download(filename, data);
-        lines.length = 0; // Clear the lines array for the next download
+        const data = lines.join('\r\n');
+        const blob = new Blob([data], { type: 'text/calendar;charset=utf-8' });
+  
+        // Create a link element and simulate a click to trigger the download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       },
     };
   };
+  
   
 
 
