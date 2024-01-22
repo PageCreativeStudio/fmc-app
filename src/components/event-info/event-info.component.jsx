@@ -111,33 +111,17 @@ END:VCALENDAR
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
-      time, 
-      timeEnd 
+      time,
+      timeEnd
     );
   
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
     // Create an anchor element to trigger the download
     const downloadLink = document.createElement('a');
     downloadLink.href = calendarDataUrl;
     downloadLink.download = `${title}.ics`; // Use the event title as the file name
-  
-    if (isMobile) {
-      // For mobile devices, use a custom download function
-      downloadLink.style.display = 'none';
-      document.body.appendChild(downloadLink);
-  
-      // Simulate a click on the hidden link
-      downloadLink.click();
-  
-      // Remove the link from the body after the click
-      document.body.removeChild(downloadLink);
-    } else {
-      // For desktop, append the link to the body and simulate a click
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    }
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   
     // Release the Blob URL after a short delay to allow the download to start
     setTimeout(() => {
