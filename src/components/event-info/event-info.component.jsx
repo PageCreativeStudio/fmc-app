@@ -117,24 +117,20 @@ END:VCALENDAR
   
     const downloadLink = document.createElement('a');
     downloadLink.href = calendarDataUrl;
-    downloadLink.download = `${title}.ics`;
+    downloadLink.target = '_blank'; // Open in a new window/tab
     document.body.appendChild(downloadLink);
-    
-    // Simulate a click for mobile Safari
-    const clickEvent = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-    });
-    downloadLink.dispatchEvent(clickEvent);
-    
+  
+    // Trigger the download by opening a new window
+    window.open(downloadLink.href, '_blank');
+  
+    // Remove the temporary link element from the document
     document.body.removeChild(downloadLink);
-    
+  
     // Release the Blob URL after a short delay to allow the download to start
     setTimeout(() => {
       window.URL.revokeObjectURL(calendarDataUrl);
     }, 1000);
-    
+
   };
 
 
