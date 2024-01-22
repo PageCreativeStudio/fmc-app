@@ -132,19 +132,24 @@ END:VCALENDAR
     // Create a Blob containing the iCal data
     const blob = new Blob([calendarData], { type: 'text/calendar' });
   
-    // Create a temporary anchor element and trigger the download
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = filename;
+    // Check if Internet Explorer
+    if (window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+      // Create a temporary anchor element and trigger the download
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
   
-    // Append the anchor to the document and trigger the click
-    document.body.appendChild(link);
-    link.click();
+      // Append the anchor to the document and trigger the click
+      document.body.appendChild(link);
+      link.click();
   
-    // Clean up the temporary anchor
-    document.body.removeChild(link);
+      // Clean up the temporary anchor
+      document.body.removeChild(link);
+    }
   };
-
+  
 
 
   return (
