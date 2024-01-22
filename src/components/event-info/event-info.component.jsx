@@ -127,25 +127,18 @@ END:VCALENDAR
     downloadLink.href = calendarDataUrl;
     downloadLink.download = filename;
   
-    // Check if the user is on a mobile device
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    // Append the link to the document body
+    document.body.appendChild(downloadLink);
   
-    if (isMobile) {
-      // For mobile devices, trigger the download without opening a new tab
-      downloadLink.click();
-    } else {
-      // For desktop users, open the link in a new tab
-      window.open(downloadLink.href, '_blank');
-    }
+    // Trigger the download by clicking the link
+    downloadLink.click();
   
     // Release the Blob URL after a short delay to allow the download to start
     setTimeout(() => {
       window.URL.revokeObjectURL(calendarDataUrl);
   
-      if (isMobile) {
-        // For mobile devices, remove the link from the document
-        document.body.removeChild(downloadLink);
-      }
+      // Remove the temporary link element from the document
+      document.body.removeChild(downloadLink);
     }, 1000);
   };
 
