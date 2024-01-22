@@ -123,8 +123,15 @@ END:VCALENDAR
     downloadLink.download = `${title}.ics`; // Use the event title as the file name
   
     if (isMobile) {
-      // For mobile devices, use the 'click' event directly on the link
+      // For mobile devices, use a custom download function
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+  
+      // Simulate a click on the hidden link
       downloadLink.click();
+  
+      // Remove the link from the body after the click
+      document.body.removeChild(downloadLink);
     } else {
       // For desktop, append the link to the body and simulate a click
       document.body.appendChild(downloadLink);
