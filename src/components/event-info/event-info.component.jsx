@@ -40,9 +40,6 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const formattedStartDate = formatICSDate(startDate, time);
     const formattedEndDate = formatICSDate(endDate, time);
   
-    const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `${eventTitle}.ics`;
-  
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -55,73 +52,21 @@ END:VEVENT
 END:VCALENDAR
     `.trim();
   
-    return { filename, calendarData };
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    return window.URL.createObjectURL(blob);
   };
   
-  
-  
-  window.ics = function () {
-    const lines = [];
-  
-    const formatDateTime = function (date) {
-      const pad = function (number) {
-        return number < 10 ? '0' + number : number;
-      };
-  
-      return (
-        date.getUTCFullYear() +
-        pad(date.getUTCMonth() + 1) +
-        pad(date.getUTCDate()) +
-        'T' +
-        pad(date.getUTCHours()) +
-        pad(date.getUTCMinutes()) +
-        pad(date.getUTCSeconds()) +
-        'Z'
-      );
-    };
-  
-    return {
-      addEvent: function (subject, description, location, begin, end) {
-        lines.push('BEGIN:VEVENT');
-        lines.push('SUMMARY:' + subject);
-        lines.push('DESCRIPTION:' + description);
-        lines.push('LOCATION:' + location);
-        lines.push('DTSTART:' + formatDateTime(begin));
-        lines.push('DTEND:' + formatDateTime(end));
-        lines.push('END:VEVENT');
-      },
-      download: function (filename) {
-        lines.unshift('BEGIN:VCALENDAR');
-        lines.push('PRODID:CALENDAR');
-        lines.push('VERSION:2.0');
-        lines.push('END:VCALENDAR');
-        const data = lines.join('\r\n');
-        const blob = new Blob([data], { type: 'text/calendar;charset=utf-8' });
-  
-        // Create a link element and simulate a click to trigger the download
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      },
-    };
-  };
-  
-  
-
 
   const handleDownload = () => {
     if (!date && !dateEnd) {
       // Handle missing date and dateEnd
       return;
     }
-  
+
     // Parse the event date and dateEnd strings in the "Sunday 10th September 2023" format
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
-  
+
     const months = {
       January: '01',
       February: '02',
@@ -136,25 +81,25 @@ END:VCALENDAR
       November: '11',
       December: '12',
     };
-  
+
     // Initialize the start and end date strings without time
     let startDateStringWithoutTime;
     let endDateStringWithoutTime;
-  
+
     if (startDateString.length === 4) {
       startDateStringWithoutTime = `${startDateString[3]}-${months[startDateString[2]]}-${startDateString[1].slice(0, -2)}`;
     }
-  
+
     if (endDateString.length === 4) {
       endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}`;
     }
-  
+
     // Check if time is available and append it if present
     if (startDateString.length === 5) {
       const startTime = startDateString[4].split(":");
       startDateStringWithoutTime += `T${startTime[0].padStart(2, '0')}${startTime[1].padStart(2, '0')}`;
     }
-  
+
     if (endDateString.length === 5) {
       const endTime = endDateString[4].split(":");
       endDateStringWithoutTime += `T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
@@ -162,24 +107,39 @@ END:VCALENDAR
       // If no time is available and there's no dateEnd, set endDateStringWithoutTime to startDateStringWithoutTime
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
-  
-    const { filename } = generateCalendarData(
+
+    const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
-      time,
-      timeEnd
+      time, 
+      timeEnd 
     );
   
-    const calendarInstance = window.ics();
-    calendarInstance.addEvent(title, description || "", "", new Date(startDateStringWithoutTime), new Date(endDateStringWithoutTime));
-    calendarInstance.download(filename);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = calendarDataUrl;
+    downloadLink.download = `${title}.ics`; // Use the event title as the file name
+    document.body.appendChild(downloadLink);
+
+    // Open a new window for the download link
+    const downloadWindow = window.open();
+    downloadWindow.document.write('<html><body>');
+    downloadWindow.document.write('<p>Your download should start shortly. If it does not, <a href="' + calendarDataUrl + '">click here</a>.</p>');
+    downloadWindow.document.write('</body></html>');
+
+    // Trigger the download
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    // Release the Blob URL after a short delay to allow the download to start
+    setTimeout(() => {
+      window.URL.revokeObjectURL(calendarDataUrl);
+
+      // Close the new window after download
+      downloadWindow.close();
+    }, 1000);
   };
 
 
-  
-
-
-  
 
   return (
     <Wrapper colour={colour}>
