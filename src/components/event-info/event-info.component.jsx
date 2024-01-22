@@ -60,6 +60,59 @@ END:VCALENDAR
   
   
   
+  window.ics = function () {
+    const lines = [];
+  
+    const formatDateTime = function (date) {
+      const pad = function (number) {
+        return number < 10 ? '0' + number : number;
+      };
+  
+      return (
+        date.getUTCFullYear() +
+        pad(date.getUTCMonth() + 1) +
+        pad(date.getUTCDate()) +
+        'T' +
+        pad(date.getUTCHours()) +
+        pad(date.getUTCMinutes()) +
+        pad(date.getUTCSeconds()) +
+        'Z'
+      );
+    };
+  
+    const download = function (filename, data) {
+      const blob = new Blob([data], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+  
+    return {
+      addEvent: function (subject, description, location, begin, end) {
+        lines.push('BEGIN:VEVENT');
+        lines.push('SUMMARY:' + subject);
+        lines.push('DESCRIPTION:' + description);
+        lines.push('LOCATION:' + location);
+        lines.push('DTSTART:' + formatDateTime(begin));
+        lines.push('DTEND:' + formatDateTime(end));
+        lines.push('END:VEVENT');
+      },
+      download: function (filename) {
+        lines.unshift('BEGIN:VCALENDAR');
+        lines.push('PRODID:CALENDAR');
+        lines.push('VERSION:2.0');
+        lines.push('END:VCALENDAR');
+        const data = lines.join('\n');
+        download(filename, data);
+        lines.length = 0; // Clear the lines array for the next download
+      },
+    };
+  };
+  
+
 
   const handleDownload = () => {
     if (!date && !dateEnd) {
@@ -67,6 +120,7 @@ END:VCALENDAR
       return;
     }
   
+    // Parse the event date and dateEnd strings in the "Sunday 10th September 2023" format
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
   
@@ -111,46 +165,23 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
   
-    const formattedStartDate = formatICSDate(new Date(startDateStringWithoutTime), time);
-    const formattedEndDate = formatICSDate(new Date(endDateStringWithoutTime), timeEnd);
+    const { filename } = generateCalendarData(
+      new Date(startDateStringWithoutTime),
+      new Date(endDateStringWithoutTime),
+      time,
+      timeEnd
+    );
   
-    const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `${eventTitle}.ics`;
-  
-    const calendarData = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:CALENDAR
-BEGIN:VEVENT
-SUMMARY:${title}
-DTSTART:${formattedStartDate}
-DTEND:${formattedEndDate}
-DESCRIPTION:${description || ""}
-END:VEVENT
-END:VCALENDAR
-    `.trim();
-  
-    // Create a Blob containing the iCal data
-    const blob = new Blob([calendarData], { type: 'text/calendar' });
-  
-    // Check if Internet Explorer
-    if (window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveOrOpenBlob(blob, filename);
-    } else {
-      // Create a temporary anchor element and trigger the download
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = filename;
-  
-      // Append the anchor to the document and trigger the click
-      document.body.appendChild(link);
-      link.click();
-  
-      // Clean up the temporary anchor
-      document.body.removeChild(link);
-    }
+    const calendarInstance = window.ics();
+    calendarInstance.addEvent(title, description || "", "", new Date(startDateStringWithoutTime), new Date(endDateStringWithoutTime));
+    calendarInstance.download(filename);
   };
+
+
   
 
+
+  
 
   return (
     <Wrapper colour={colour}>
@@ -202,7 +233,7 @@ END:VCALENDAR
           </Title>
         )}
         {description && (
-          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "auto" : "auto"}>
+          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "8rem" : "auto"}>
             <Text dangerouslySetInnerHTML={{ __html: description.replace(/<a\b([^>]*)>(.*?)<\/a>/g, '<a style="font-size: inherit; text-decoration: underline 2px #e23734; text-underline-offset: 2px;" $1>$2</a>') }} />
           </OverflowWrapper>
         )}
