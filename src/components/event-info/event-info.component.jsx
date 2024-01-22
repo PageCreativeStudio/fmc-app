@@ -3,7 +3,6 @@ import { Flex } from "reflexbox";
 import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, BackArrow } from "./event-info.styles";
 import { withTheme } from "@emotion/react";
 
-
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
 
   const formatICSDate = (date, time) => {
@@ -42,7 +41,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const formattedEndDate = formatICSDate(endDate, time);
   
     const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `${eventTitle}_FMC_Events.ics`;
+    const filename = `${eventTitle}.ics`;
   
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -58,6 +57,7 @@ END:VCALENDAR
   
     return { filename, calendarData };
   };
+  
   
   
 
@@ -111,44 +111,39 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
   
-    // Format the data according to your custom structure
-    const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
-    const formattedStartDate = formatICSDate(startDateStringWithoutTime, time);
-    const formattedEndDate = formatICSDate(endDateStringWithoutTime, timeEnd);
-    const descriptionText = description || "";
+    const formattedStartDate = formatICSDate(new Date(startDateStringWithoutTime), time);
+    const formattedEndDate = formatICSDate(new Date(endDateStringWithoutTime), timeEnd);
   
-    const customCalendarData = `BEGIN:VCALENDAR
+    const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
+    const filename = `${eventTitle}.ics`;
+  
+    const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
-SUMMARY:${eventTitle}
+SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
-DESCRIPTION:${descriptionText}
+DESCRIPTION:${description || ""}
 END:VEVENT
-END:VCALENDAR`;
+END:VCALENDAR
+    `.trim();
   
-    // Create a Blob with the custom data
-    const customBlob = new Blob([customCalendarData], { type: 'text/calendar;charset=utf-8' });
+    // Create a Blob containing the iCal data
+    const blob = new Blob([calendarData], { type: 'text/calendar' });
   
-    // Create a download link for the custom data
-    const customLink = document.createElement('a');
-    customLink.href = window.URL.createObjectURL(customBlob);
-    customLink.setAttribute('download', `${eventTitle}_FMC_Events_Custom.ics`);
-    document.body.appendChild(customLink);
+    // Create a temporary anchor element and trigger the download
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = filename;
   
-    // Trigger the download for the custom data
-    customLink.click();
+    // Append the anchor to the document and trigger the click
+    document.body.appendChild(link);
+    link.click();
   
-    // Remove the link for the custom data from the document
-    document.body.removeChild(customLink);
-  
-    // Now, use window.ics() for downloading as well
-    const calendarInstance = window.ics();
-    calendarInstance.addEvent(title, description || "", "", new Date(startDateStringWithoutTime), new Date(endDateStringWithoutTime));
-    calendarInstance.download(`${eventTitle}_FMC_Events.ics`);
+    // Clean up the temporary anchor
+    document.body.removeChild(link);
   };
-  
 
 
 
@@ -202,7 +197,7 @@ END:VCALENDAR`;
           </Title>
         )}
         {description && (
-          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "8rem" : "auto"}>
+          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "auto" : "auto"}>
             <Text dangerouslySetInnerHTML={{ __html: description.replace(/<a\b([^>]*)>(.*?)<\/a>/g, '<a style="font-size: inherit; text-decoration: underline 2px #e23734; text-underline-offset: 2px;" $1>$2</a>') }} />
           </OverflowWrapper>
         )}
