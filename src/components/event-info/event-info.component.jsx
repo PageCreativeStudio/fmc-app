@@ -41,7 +41,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const formattedEndDate = formatICSDate(endDate, time);
   
     const eventTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `${eventTitle}.ics`;
+    const filename = `${eventTitle}_FMC_Events.ics`;
   
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -66,11 +66,11 @@ END:VCALENDAR
       // Handle missing date and dateEnd
       return;
     }
-
+  
     // Parse the event date and dateEnd strings in the "Sunday 10th September 2023" format
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
-
+  
     const months = {
       January: '01',
       February: '02',
@@ -85,25 +85,25 @@ END:VCALENDAR
       November: '11',
       December: '12',
     };
-
+  
     // Initialize the start and end date strings without time
     let startDateStringWithoutTime;
     let endDateStringWithoutTime;
-
+  
     if (startDateString.length === 4) {
       startDateStringWithoutTime = `${startDateString[3]}-${months[startDateString[2]]}-${startDateString[1].slice(0, -2)}`;
     }
-
+  
     if (endDateString.length === 4) {
       endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}`;
     }
-
+  
     // Check if time is available and append it if present
     if (startDateString.length === 5) {
       const startTime = startDateString[4].split(":");
       startDateStringWithoutTime += `T${startTime[0].padStart(2, '0')}${startTime[1].padStart(2, '0')}`;
     }
-
+  
     if (endDateString.length === 5) {
       const endTime = endDateString[4].split(":");
       endDateStringWithoutTime += `T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
@@ -111,7 +111,7 @@ END:VCALENDAR
       // If no time is available and there's no dateEnd, set endDateStringWithoutTime to startDateStringWithoutTime
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
-
+  
     const { filename, calendarData } = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
@@ -119,10 +119,18 @@ END:VCALENDAR
       timeEnd
     );
   
-    const calendarInstance = window.ics();
-    calendarInstance.addEvent(title, description || "", "", new Date(startDateStringWithoutTime), new Date(endDateStringWithoutTime));
-    calendarInstance.download(filename);
+    // Create a Blob with the calendar data
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+  
+    // Create a link element and trigger the download
+    const downloadLink = document.createElement('a');
+    downloadLink.href = window.URL.createObjectURL(blob);
+    downloadLink.download = filename;
+  
+    // Trigger the download by clicking the link
+    downloadLink.click();
   };
+  
 
 
 
