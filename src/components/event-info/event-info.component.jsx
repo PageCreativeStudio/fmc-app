@@ -9,31 +9,31 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     if (!date) {
       return "";
     }
+  
     const dateObj = new Date(date);
-
-    // Check if time is available
-    if (time) {
-      // Extract hours, minutes, and AM/PM from the time
-      const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
-      if (!timeParts) {
-        // If time format doesn't match, return the formatted date without any time
-        return dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z").substring(0, 8);
+  
+    // Check if time is available and has a valid format
+    if (time && /^(\d{2}:\d{2})$/.test(time)) {
+      const timeParts = time.split(":");
+      const hours = parseInt(timeParts[0], 10);
+      const minutes = parseInt(timeParts[1], 10);
+  
+      if (!isNaN(hours) && !isNaN(minutes)) {
+        dateObj.setHours(hours, minutes);
       }
-      let hours = parseInt(timeParts[1], 10);
-      const minutes = parseInt(timeParts[2], 10);
-      const period = timeParts[3].toLowerCase();
-      // Adjust hours if PM and not 12 PM
-      if (period === "pm" && hours !== 12) {
-        hours += 12;
-      }
-      // Set the time
-      dateObj.setHours(hours, minutes);
     }
-
+  
     // Format the date and time as "YYYYMMDDTHHMMSSZ"
-    const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
-    return formattedDate;
+    const year = dateObj.getUTCFullYear();
+    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+  
+    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   };
+  
   
 
   const generateCalendarData = (startDate, endDate) => {
@@ -50,11 +50,11 @@ DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-    `.trim();
+        `.trim();
   
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
+    return calendarData;
   };
+  
   
 
   const handleDownload = () => {
@@ -62,11 +62,10 @@ END:VCALENDAR
       // Handle missing date and dateEnd
       return;
     }
-
-    // Parse the event date and dateEnd strings in the "Sunday 10th September 2023" format
+  
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
-
+  
     const months = {
       January: '01',
       February: '02',
@@ -81,53 +80,50 @@ END:VCALENDAR
       November: '11',
       December: '12',
     };
-
-    // Initialize the start and end date strings without time
+  
     let startDateStringWithoutTime;
     let endDateStringWithoutTime;
-
+  
     if (startDateString.length === 4) {
       startDateStringWithoutTime = `${startDateString[3]}-${months[startDateString[2]]}-${startDateString[1].slice(0, -2)}`;
     }
-
+  
     if (endDateString.length === 4) {
       endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}`;
     }
-
-    // Check if time is available and append it if present
+  
     if (startDateString.length === 5) {
       const startTime = startDateString[4].split(":");
       startDateStringWithoutTime += `T${startTime[0].padStart(2, '0')}${startTime[1].padStart(2, '0')}`;
     }
-
+  
     if (endDateString.length === 5) {
       const endTime = endDateString[4].split(":");
       endDateStringWithoutTime += `T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
     } else if (!dateEnd) {
-      // If no time is available and there's no dateEnd, set endDateStringWithoutTime to startDateStringWithoutTime
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
-
-    const calendarDataUrl = generateCalendarData(
-      new Date(startDateStringWithoutTime),
-      new Date(endDateStringWithoutTime),
-      time,
-      timeEnd
-    );
   
-    // Create an anchor element to trigger the download
-    const downloadLink = document.createElement('a');
-    downloadLink.href = calendarDataUrl;
-    downloadLink.download = `${title}.ics`; // Use the event title as the file name
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    const formattedStartDate = formatICSDate(startDateStringWithoutTime, time);
+    const formattedEndDate = formatICSDate(endDateStringWithoutTime, timeEnd);
   
-    // Release the Blob URL after a short delay to allow the download to start
-    setTimeout(() => {
-      window.URL.revokeObjectURL(calendarDataUrl);
-    }, 1000);
+    const calendarData = generateCalendarData(formattedStartDate, formattedEndDate);
+  
+    // Create a data URL for the Blob
+    const dataURL = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
+  
+    // Create a link element and trigger the download
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = `${title}.ics`;
+  
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+  
+  
+  
 
 
 
@@ -186,7 +182,7 @@ END:VCALENDAR
           </OverflowWrapper>
         )}
         <Flex>
-          <Text style={{ marginTop: "1.5rem", fonSize: "19px", textDecoration: "underline 2px #e23734", textUnderlineOffset: "5px" }}>
+          <Text style={{ marginTop: "1.5rem", fontSize: "19px", textDecoration: "underline 2px #e23734", textUnderlineOffset: "5px" }}>
             <a style={{ color: "#e23734", fontWeight: 400 }} href="#" onClick={handleDownload}>
               iCal Download
             </a>
