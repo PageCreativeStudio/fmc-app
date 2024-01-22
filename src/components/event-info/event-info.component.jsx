@@ -117,15 +117,11 @@ END:VCALENDAR
   
     const downloadLink = document.createElement('a');
     downloadLink.href = calendarDataUrl;
-  
-    // Set the download attribute with the desired filename
-    downloadLink.download = `${title}.ics`;
-  
-    // Append the link to the document body
+    downloadLink.target = '_blank'; // Open in a new window/tab
     document.body.appendChild(downloadLink);
   
     // Trigger the download by opening a new window
-    const newWindow = window.open(downloadLink.href, '_blank');
+    window.open(downloadLink.href, '_blank');
   
     // Remove the temporary link element from the document
     document.body.removeChild(downloadLink);
@@ -134,11 +130,6 @@ END:VCALENDAR
     setTimeout(() => {
       window.URL.revokeObjectURL(calendarDataUrl);
     }, 1000);
-  
-    // Close the new window after a short delay (adjust the delay if needed)
-    setTimeout(() => {
-      newWindow.close();
-    }, 2000); // Adjust the delay if needed
 
   };
 
@@ -194,7 +185,7 @@ END:VCALENDAR
           </Title>
         )}
         {description && (
-          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "100%" : "auto"}>
+          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "8rem" : "auto"}>
             <Text dangerouslySetInnerHTML={{ __html: description.replace(/<a\b([^>]*)>(.*?)<\/a>/g, '<a style="font-size: inherit; text-decoration: underline 2px #e23734; text-underline-offset: 2px;" $1>$2</a>') }} />
           </OverflowWrapper>
         )}
