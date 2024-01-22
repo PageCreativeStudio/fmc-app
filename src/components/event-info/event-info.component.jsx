@@ -189,7 +189,7 @@ END:VCALENDAR
           </Title>
         )}
         {description && (
-          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "8rem" : "auto"}>
+          <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "100%" : "auto"}>
             <Text dangerouslySetInnerHTML={{ __html: description.replace(/<a\b([^>]*)>(.*?)<\/a>/g, '<a style="font-size: inherit; text-decoration: underline 2px #e23734; text-underline-offset: 2px;" $1>$2</a>') }} />
           </OverflowWrapper>
         )}
