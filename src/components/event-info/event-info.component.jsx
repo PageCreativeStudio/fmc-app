@@ -122,19 +122,33 @@ END:VCALENDAR
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     const calendarDataUrl = window.URL.createObjectURL(blob);
   
+    // Create a temporary link element
     const downloadLink = document.createElement('a');
     downloadLink.href = calendarDataUrl;
     downloadLink.target = '_blank';
     downloadLink.download = filename;
   
+    // Append the link to the document body
     document.body.appendChild(downloadLink);
+  
+    // Trigger the download by clicking the link
     downloadLink.click();
+  
+    // Remove the temporary link element from the document
     document.body.removeChild(downloadLink);
   
+    // Release the Blob URL after a short delay to allow the download to start
     setTimeout(() => {
       window.URL.revokeObjectURL(calendarDataUrl);
+  
+      // Close the new window after a short delay (adjust the delay if needed)
+      setTimeout(() => {
+        if (!downloadLink.parentElement) {
+          // Check if the link has been removed from the document
+          window.close();
+        }
+      }, 500); // Adjust the delay if needed
     }, 1000);
-
   };
 
 
