@@ -115,19 +115,20 @@ END:VCALENDAR
       timeEnd 
     );
   
-    const downloadWindow = window.open();
-    downloadWindow.document.write('<html><body>');
-    downloadWindow.document.write('<p>Your download should start shortly. If it does not, <a id="download-link" href="' + calendarDataUrl + '">click here</a>.</p>');
-    downloadWindow.document.write('</body></html>');
-
-    // Trigger the download
-    const downloadLink = downloadWindow.document.getElementById('download-link');
-    downloadLink.click();
-
-    // Release the Blob URL and close the new window after a short delay
+    const downloadLink = document.createElement('a');
+    downloadLink.href = calendarDataUrl;
+    downloadLink.target = '_blank'; // Open in a new window/tab
+    document.body.appendChild(downloadLink);
+  
+    // Trigger the download by opening a new window
+    window.open(downloadLink.href, '_blank');
+  
+    // Remove the temporary link element from the document
+    document.body.removeChild(downloadLink);
+  
+    // Release the Blob URL after a short delay to allow the download to start
     setTimeout(() => {
       window.URL.revokeObjectURL(calendarDataUrl);
-      downloadWindow.close();
     }, 1000);
   };
 
