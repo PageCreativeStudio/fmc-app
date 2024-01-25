@@ -122,8 +122,25 @@ END:VCALENDAR
       timeEnd
     );
   
-    // Open the download link in a new window
-    window.open(downloadLink, '_blank');
+    const filename = `${title}.ics`; // Set the filename to the event title
+    const downloadLinkElement = document.createElement('a');
+    downloadLinkElement.href = downloadLink;
+    downloadLinkElement.download = filename;
+  
+    // Append the link to the document
+    document.body.appendChild(downloadLinkElement);
+  
+    // Trigger a click on the link to start the download
+    downloadLinkElement.click();
+  
+    // Remove the temporary link element from the document
+    document.body.removeChild(downloadLinkElement);
+  
+    // Release the Blob URL after a short delay to allow the download to start
+    setTimeout(() => {
+      window.URL.revokeObjectURL(downloadLink);
+    }, 1000);
+    
   };
 
 
