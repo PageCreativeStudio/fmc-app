@@ -108,39 +108,40 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
+    const filename = `${title}.ics`; // Set the filename to the event title
+
     const calendarDataUrl = generateCalendarData(
-      new Date(startDateStringWithoutTime),
-      new Date(endDateStringWithoutTime),
-      time, 
-      timeEnd 
-    );
-  
-    const downloadLink = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
       time,
       timeEnd
     );
   
-    const filename = `${title}.ics`; // Set the filename to the event title
-    const downloadLinkElement = document.createElement('a');
-    downloadLinkElement.href = downloadLink;
-    downloadLinkElement.download = filename;
+    // Check if the device is a mobile screen
+    if (window.innerWidth <= 767) {
+      const downloadLink = generateCalendarData(
+        new Date(startDateStringWithoutTime),
+        new Date(endDateStringWithoutTime),
+        time,
+        timeEnd
+      );
   
-    // Append the link to the document
-    document.body.appendChild(downloadLinkElement);
+      // Open the download link in a new window for mobile screens
+      window.open(downloadLink, '_blank');
+    } else {
+      // Create an anchor element to trigger the download for desktop screens
+      const downloadLink = document.createElement('a');
+      downloadLink.href = calendarDataUrl;
+      downloadLink.download = filename;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
   
-    // Trigger a click on the link to start the download
-    downloadLinkElement.click();
-  
-    // Remove the temporary link element from the document
-    document.body.removeChild(downloadLinkElement);
-  
-    // Release the Blob URL after a short delay to allow the download to start
-    setTimeout(() => {
-      window.URL.revokeObjectURL(downloadLink);
-    }, 1000);
-    
+      // Release the Blob URL after a short delay to allow the download to start
+      setTimeout(() => {
+        window.URL.revokeObjectURL(calendarDataUrl);
+      }, 1000);
+    }
   };
 
 
