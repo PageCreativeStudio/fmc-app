@@ -127,7 +127,7 @@ END:VCALENDAR
       );
   
       // Open the download link in a new window for mobile screens
-      window.open(downloadLink);
+      window.open(downloadLink, '_blank');
     } else {
       // Create an anchor element to trigger the download for desktop screens
       const downloadLink = document.createElement('a');
