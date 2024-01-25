@@ -117,11 +117,13 @@ END:VCALENDAR
   
     const downloadLink = document.createElement('a');
     downloadLink.href = calendarDataUrl;
-    downloadLink.target = '_blank'; // Open in a new window/tab
+    downloadLink.download = `${title}.ics`; // Set the filename to "event.ics"
+    
+    // Append the link to the document
     document.body.appendChild(downloadLink);
   
-    // Trigger the download by opening a new window
-    window.open(downloadLink.href, '_blank');
+    // Trigger a click on the link to start the download
+    downloadLink.click();
   
     // Remove the temporary link element from the document
     document.body.removeChild(downloadLink);
