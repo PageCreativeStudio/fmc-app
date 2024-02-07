@@ -36,7 +36,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
   };
 
 
-  const generateCalendarData = (startDate, endDate, timeStart, timeEnd) => {
+  const generateCalendarData = (startDate, endDate, timeStart, timeEnd, title) => {
     const formattedStartDate = formatICSDate(startDate, timeStart);
     const formattedEndDate = formatICSDate(endDate, timeEnd);
     
@@ -51,8 +51,23 @@ END:VEVENT
 END:VCALENDAR`.trim();
     
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
-  };
+
+    // Create a filename based on the event title
+    const filename = `${title.replace(/\s+/g, '_')}.ics`;
+
+    // Create an anchor element to trigger the download
+    const anchor = document.createElement('a');
+    anchor.href = window.URL.createObjectURL(blob);
+    anchor.download = filename;
+
+    // Simulate a click to trigger the download
+    anchor.click();
+
+    // Release the Blob URL after a short delay to allow the download to start
+    setTimeout(() => {
+      window.URL.revokeObjectURL(anchor.href);
+    }, 1000);
+};
   
 
   const handleDownload = () => {
@@ -109,9 +124,10 @@ END:VCALENDAR`.trim();
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
-      time, 
-      timeEnd 
-    );
+      time,
+      timeEnd,
+      title // Pass the title to the function
+  );
   
     // Open a new window with the data URI
     const newWindow = window.open(calendarDataUrl, '_blank');
