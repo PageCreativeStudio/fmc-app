@@ -108,7 +108,7 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    const filename = `${title}.ics`; // Set the filename to the event title
+    const filename = `${title}.ics`;
 
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
@@ -126,18 +126,14 @@ END:VCALENDAR
         timeEnd
       );
   
-      // Open the download link in a new window for mobile screens
       window.open(downloadLink, '_blank');
     } else {
-      // Create an anchor element to trigger the download for desktop screens
       const downloadLink = document.createElement('a');
       downloadLink.href = calendarDataUrl;
       downloadLink.download = filename;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-  
-      // Release the Blob URL after a short delay to allow the download to start
       setTimeout(() => {
         window.URL.revokeObjectURL(calendarDataUrl);
       }, 1000);
