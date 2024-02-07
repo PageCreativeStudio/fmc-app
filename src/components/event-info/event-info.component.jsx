@@ -117,14 +117,16 @@ END:VCALENDAR
       timeEnd
     );
   
+    // Use the 'a' element for consistent behavior on both mobile and desktop
+    const downloadLink = document.createElement('a');
+    downloadLink.href = calendarDataUrl;
+    downloadLink.download = filename;
+  
     if (window.innerWidth <= 767) {
       // For mobile, open a new blank tab
-      window.open(calendarDataUrl, '_blank');
+      window.open(downloadLink.href, '_blank');
     } else {
-      // For desktop, create a download link and trigger the click
-      const downloadLink = document.createElement('a');
-      downloadLink.href = calendarDataUrl;
-      downloadLink.download = filename;
+      // For desktop, trigger the click and remove the link
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
