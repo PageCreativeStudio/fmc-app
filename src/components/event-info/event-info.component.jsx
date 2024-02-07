@@ -117,24 +117,32 @@ END:VCALENDAR
     timeEnd
   );
 
+  // Create a Blob for the calendar data
+  const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+
   // For mobile, create a data URI and open a new tab
   if (window.innerWidth <= 767) {
-    // Open a new window with the data URI
-    const newWindow = window.open(calendarDataUrl, '_blank');
+    const dataUri = URL.createObjectURL(blob);
+    const newWindow = window.open(dataUri, '_blank');
     if (!newWindow) {
-      // If the new window is blocked (common on iOS), provide instructions to the user
-      alert('Please allow pop-ups for this site to download the file.');
+      // Handling popup blocking
+      alert('Please allow pop-ups to download the calendar event.');
     }
   } else {
     // For desktop, create a download link and trigger the click
     const downloadLink = document.createElement('a');
-    downloadLink.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
+    downloadLink.href = URL.createObjectURL(blob);
     downloadLink.download = filename;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
   }
-  };
+
+  // Cleanup: revoke the object URL after a short delay
+  setTimeout(() => {
+    URL.revokeObjectURL(blob);
+  }, 1000);
+};
 
 
 
