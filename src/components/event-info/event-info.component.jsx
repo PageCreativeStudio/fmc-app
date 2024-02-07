@@ -3,17 +3,16 @@ import { Flex } from "reflexbox";
 import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, BackArrow } from "./event-info.styles";
 import { withTheme } from "@emotion/react";
 
-const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
+const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colour = theme.colors.primary, onClick }) => {
 
   const formatICSDate = (date, time) => {
     if (!date) {
       return "";
     }
     const dateObj = new Date(date);
-    // Set the time to 12:00 PM (noon) if no time is available
-    if (!time) {
-      dateObj.setHours(12, 0, 0, 0);
-    } else {
+
+    // Check if time is available
+    if (time) {
       // Extract hours, minutes, and AM/PM from the time
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (!timeParts) {
@@ -30,16 +29,17 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       // Set the time
       dateObj.setHours(hours, minutes);
     }
+
     // Format the date and time as "YYYYMMDDTHHMMSSZ"
     const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
     return formattedDate;
   };
 
 
-  const generateCalendarData = (startDate, endDate, timeStart, timeEnd, title) => {
-    const formattedStartDate = formatICSDate(startDate, timeStart);
-    const formattedEndDate = formatICSDate(endDate, timeEnd);
-    
+  const generateCalendarData = (startDate, endDate) => {
+    const formattedStartDate = formatICSDate(startDate, time);
+    const formattedEndDate = formatICSDate(endDate, time);
+
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -48,27 +48,10 @@ SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
 END:VEVENT
-END:VCALENDAR`.trim();
-    
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-
-    // Create a filename based on the event title
-    const filename = `${title.replace(/\s+/g, '_')}.ics`;
-
-    // Create an anchor element to trigger the download
-    const anchor = document.createElement('a');
-    anchor.href = window.URL.createObjectURL(blob);
-    anchor.download = filename;
-
-    // Simulate a click to trigger the download
-    anchor.click();
-
-    // Release the Blob URL after a short delay to allow the download to start
-    setTimeout(() => {
-      window.URL.revokeObjectURL(anchor.href);
-    }, 1000);
-};
-  
+END:VCALENDAR
+  `.trim();
+    return `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
+  };
 
   const handleDownload = () => {
     if (!date && !dateEnd) {
@@ -121,25 +104,17 @@ END:VCALENDAR`.trim();
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    const calendarDataUrl = generateCalendarData(
+    // Generate the .ics file with the new dates (without time)
+    const calendarData = generateCalendarData(
       new Date(startDateStringWithoutTime),
-      new Date(endDateStringWithoutTime),
-      time,
-      timeEnd,
-      title // Pass the title to the function
-  );
-  
-    // Open a new window with the data URI
-    const newWindow = window.open(calendarDataUrl, '_blank');
-    if (!newWindow) {
-      // If the new window is blocked (common on iOS), provide instructions to the user
-      alert('Please allow pop-ups for this site to download the file.');
-    }
-  
-    // Release the Blob URL after a short delay to allow the download to start
-    setTimeout(() => {
-      window.URL.revokeObjectURL(calendarDataUrl);
-    }, 1000);
+      new Date(endDateStringWithoutTime)
+    );
+
+    const element = document.createElement("a");
+    element.href = calendarData;
+    element.download = `${title}.ics`;
+    document.body.appendChild(element);
+    element.click();
   };
 
 
@@ -181,7 +156,6 @@ END:VCALENDAR`.trim();
           <Text>
             {date && date}
             {time && <>, {time}</>}
-            {timeEnd && <>, {timeEnd}</>}
             {dateEnd && <> - {dateEnd}</>}
           </Text>
         )}
