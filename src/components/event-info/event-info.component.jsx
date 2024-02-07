@@ -117,17 +117,18 @@ END:VCALENDAR
       timeEnd
     );
   
-    // Use the 'a' element for consistent behavior on both mobile and desktop
-    const downloadLink = document.createElement('a');
-    downloadLink.href = calendarDataUrl;
-    downloadLink.download = filename;
-  
-    // For mobile, open a new blank tab
+    // For mobile, open a new blank tab using a link element
     if (window.innerWidth <= 767) {
-      const newWindow = window.open();
-      newWindow.location.href = downloadLink.href;
+      const link = document.createElement('a');
+      link.href = calendarDataUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.click();
     } else {
       // For desktop, trigger the click and remove the link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = calendarDataUrl;
+      downloadLink.download = filename;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
@@ -137,7 +138,7 @@ END:VCALENDAR
         window.URL.revokeObjectURL(calendarDataUrl);
       }, 1000);
     }
-    
+
   };
 
 
