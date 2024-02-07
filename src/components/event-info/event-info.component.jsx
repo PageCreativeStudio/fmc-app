@@ -107,30 +107,37 @@ END:VCALENDAR
       // If no time is available and there's no dateEnd, set endDateStringWithoutTime to startDateStringWithoutTime
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
+
     const filename = `${title}.ics`;
 
-    const calendarData = generateCalendarData(
+    const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
       time,
       timeEnd
     );
   
-    // For mobile, open a new blank tab using the 'window.open' method
+    // Check if the device is a mobile screen
     if (window.innerWidth <= 767) {
-      const newWindow = window.open();
-      newWindow.document.write(`<a href="${calendarData}" download="${filename}">Download iCal</a>`);
-      newWindow.document.close();
+      const downloadLink = generateCalendarData(
+        new Date(startDateStringWithoutTime),
+        new Date(endDateStringWithoutTime),
+        time,
+        timeEnd
+      );
+  
+      window.open(downloadLink, '_blank');
     } else {
-      // For desktop, trigger the click and remove the link
       const downloadLink = document.createElement('a');
-      downloadLink.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
+      downloadLink.href = calendarDataUrl;
       downloadLink.download = filename;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
+      setTimeout(() => {
+        window.URL.revokeObjectURL(calendarDataUrl);
+      }, 1000);
     }
-
   };
 
 
