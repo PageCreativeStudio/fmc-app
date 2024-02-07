@@ -109,10 +109,6 @@ END:VCALENDAR
 
     const filename = `${title}.ics`;
 
-    console.log("startDateStringWithoutTime:", startDateStringWithoutTime);
-    console.log("endDateStringWithoutTime:", endDateStringWithoutTime);
-
-
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
