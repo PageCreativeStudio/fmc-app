@@ -117,23 +117,19 @@ END:VCALENDAR
       timeEnd
     );
   
-    // Check if the device is a mobile screen
+    // For mobile, open a new blank tab using the 'window.location.href' method
     if (window.innerWidth <= 767) {
-      const downloadLink = generateCalendarData(
-        new Date(startDateStringWithoutTime),
-        new Date(endDateStringWithoutTime),
-        time,
-        timeEnd
-      );
-  
-      window.open(downloadLink, '_blank');
+      window.location.href = calendarDataUrl;
     } else {
+      // For desktop, trigger the click and remove the link
       const downloadLink = document.createElement('a');
       downloadLink.href = calendarDataUrl;
       downloadLink.download = filename;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
+  
+      // Cleanup: revoke the object URL after a short delay
       setTimeout(() => {
         window.URL.revokeObjectURL(calendarDataUrl);
       }, 1000);
