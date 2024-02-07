@@ -109,7 +109,7 @@ END:VCALENDAR
     }
 
     const filename = `${title}.ics`;
-  
+
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
@@ -118,21 +118,26 @@ END:VCALENDAR
     );
   
     // Check if the device is a mobile screen
-    if (window.innerWidth <= 767) {
-      const downloadLink = document.createElement('a');
-      downloadLink.href = calendarDataUrl;
-      downloadLink.download = filename;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-      setTimeout(() => {
-        window.URL.revokeObjectURL(calendarDataUrl);
-      }, 1000);
+    if (window.innerWidth >= 767) {
+        const downloadLink = document.createElement('a');
+            downloadLink.href = calendarDataUrl;
+            downloadLink.download = filename;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            setTimeout(() => {
+              window.URL.revokeObjectURL(calendarDataUrl);
+            }, 1000);
+          window.open(downloadLink, '_blank');
     } else {
-      // For desktop, open a new tab with the Blob URL
-      window.open(calendarDataUrl, '_blank');
+      const downloadLink = generateCalendarData(
+        new Date(startDateStringWithoutTime),
+        new Date(endDateStringWithoutTime),
+        time,
+        timeEnd
+        );
     }
-};
+  };
 
 
 
