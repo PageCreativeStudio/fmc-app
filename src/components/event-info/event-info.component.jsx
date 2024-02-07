@@ -110,31 +110,29 @@ END:VCALENDAR
 
   const filename = `${title}.ics`;
 
-  const calendarDataUrl = generateCalendarData(
+  const calendarData = generateCalendarData(
     new Date(startDateStringWithoutTime),
     new Date(endDateStringWithoutTime),
     time,
     timeEnd
   );
 
-  // For mobile, open a new blank tab using the 'window.open' method
+  // For mobile, create a data URI and open a new tab
   if (window.innerWidth <= 767) {
-    const newWindow = window.open();
-    newWindow.document.write(`<a href="${calendarDataUrl}" download="${filename}">Download iCal</a>`);
-    newWindow.document.close();
+    const dataUri = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
+    const newWindow = window.open(dataUri, '_blank');
+    if (!newWindow) {
+      // Handling popup blocking
+      alert('Please allow pop-ups to download the calendar event.');
+    }
   } else {
-    // For desktop, trigger the click and remove the link
+    // For desktop, create a download link and trigger the click
     const downloadLink = document.createElement('a');
-    downloadLink.href = calendarDataUrl;
+    downloadLink.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
     downloadLink.download = filename;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-
-    // Cleanup: revoke the object URL after a short delay
-    setTimeout(() => {
-      window.URL.revokeObjectURL(calendarDataUrl);
-    }, 1000);
   }
   };
 
