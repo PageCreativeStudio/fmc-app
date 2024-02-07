@@ -122,9 +122,10 @@ END:VCALENDAR
     downloadLink.href = calendarDataUrl;
     downloadLink.download = filename;
   
+    // For mobile, open a new blank tab
     if (window.innerWidth <= 767) {
-      // For mobile, open a new blank tab
-      window.open(downloadLink.href, '_blank');
+      const newWindow = window.open();
+      newWindow.location.href = downloadLink.href;
     } else {
       // For desktop, trigger the click and remove the link
       document.body.appendChild(downloadLink);
@@ -136,6 +137,7 @@ END:VCALENDAR
         window.URL.revokeObjectURL(calendarDataUrl);
       }, 1000);
     }
+    
   };
 
 
