@@ -10,9 +10,10 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       return "";
     }
     const dateObj = new Date(date);
-
-    // Check if time is available
-    if (time) {
+    // Set the time to 12:00 PM (noon) if no time is available
+    if (!time) {
+      dateObj.setHours(12, 0, 0, 0);
+    } else {
       // Extract hours, minutes, and AM/PM from the time
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (!timeParts) {
@@ -29,18 +30,16 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       // Set the time
       dateObj.setHours(hours, minutes);
     }
-
     // Format the date and time as "YYYYMMDDTHHMMSSZ"
     const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
     return formattedDate;
   };
-  
 
 
-  const generateCalendarData = (startDate, endDate) => {
-    const formattedStartDate = formatICSDate(startDate, time);
-    const formattedEndDate = formatICSDate(endDate, time);
-
+  const generateCalendarData = (startDate, endDate, timeStart, timeEnd) => {
+    const formattedStartDate = formatICSDate(startDate, timeStart);
+    const formattedEndDate = formatICSDate(endDate, timeEnd);
+    
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -49,15 +48,11 @@ SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
 END:VEVENT
-END:VCALENDAR
-  `.trim();
-  
+END:VCALENDAR`.trim();
+    
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
   };
-  
-  
-  
   
 
   const handleDownload = () => {
