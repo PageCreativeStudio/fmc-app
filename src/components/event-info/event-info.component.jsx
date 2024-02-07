@@ -119,11 +119,11 @@ END:VCALENDAR
 
   // For mobile, create a data URI and open a new tab
   if (window.innerWidth <= 767) {
-    const dataUri = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
-    const newWindow = window.open(dataUri, '_blank');
+    // Open a new window with the data URI
+    const newWindow = window.open(calendarDataUrl, '_blank');
     if (!newWindow) {
-      // Handling popup blocking
-      alert('Please allow pop-ups to download the calendar event.');
+      // If the new window is blocked (common on iOS), provide instructions to the user
+      alert('Please allow pop-ups for this site to download the file.');
     }
   } else {
     // For desktop, create a download link and trigger the click
