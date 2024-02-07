@@ -5,34 +5,35 @@ import { withTheme } from "@emotion/react";
 
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
 
-const formatICSDate = (date, time) => {
-  if (!date) {
-    return "";
-  }
-  const dateObj = new Date(date);
+  const formatICSDate = (date, time) => {
+    if (!date) {
+      return "";
+    }
+    const dateObj = new Date(date);
 
-  // Check if time is available
-  if (time) {
-    const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
-    if (timeParts) {
+    // Check if time is available
+    if (time) {
+      // Extract hours, minutes, and AM/PM from the time
+      const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
+      if (!timeParts) {
+        // If time format doesn't match, return the formatted date without any time
+        return dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z").substring(0, 8);
+      }
       let hours = parseInt(timeParts[1], 10);
       const minutes = parseInt(timeParts[2], 10);
       const period = timeParts[3].toLowerCase();
-
       // Adjust hours if PM and not 12 PM
       if (period === "pm" && hours !== 12) {
         hours += 12;
       }
-
       // Set the time
       dateObj.setHours(hours, minutes);
     }
-  }
 
-  // Format the date and time with time zone information
-  const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
-  return formattedDate;
-};
+    // Format the date and time as "YYYYMMDDTHHMMSSZ"
+    const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
+    return formattedDate;
+  };
   
 
   const generateCalendarData = (startDate, endDate) => {
@@ -197,7 +198,7 @@ END:VCALENDAR
         )}
         <Flex>
           <Text style={{ marginTop: "1.5rem", fonSize: "19px", textDecoration: "underline 2px #e23734", textUnderlineOffset: "5px" }}>
-            <a style={{ color: "#e23734", fontWeight: 400}} href="#" onClick={handleDownload}>
+            <a style={{ color: "#e23734", fontWeight: 400 }} href="#" onClick={handleDownload}>
               iCal Download
             </a>
           </Text>
