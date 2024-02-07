@@ -3,7 +3,7 @@ import { Flex } from "reflexbox";
 import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, BackArrow } from "./event-info.styles";
 import { withTheme } from "@emotion/react";
 
-const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colour = theme.colors.primary, onClick }) => {
+const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
 
   const formatICSDate = (date, time) => {
     if (!date) {
@@ -34,12 +34,12 @@ const EventInfo = ({ theme, title, date, dateEnd, time, description, image, colo
     const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
     return formattedDate;
   };
-
+  
 
   const generateCalendarData = (startDate, endDate) => {
     const formattedStartDate = formatICSDate(startDate, time);
     const formattedEndDate = formatICSDate(endDate, time);
-
+  
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -47,11 +47,15 @@ BEGIN:VEVENT
 SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
+DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-  `.trim();
-    return `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarData)}`;
+    `.trim();
+  
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    return window.URL.createObjectURL(blob);
   };
+  
 
   const handleDownload = () => {
     if (!date && !dateEnd) {
@@ -104,17 +108,36 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    // Generate the .ics file with the new dates (without time)
-    const calendarData = generateCalendarData(
-      new Date(startDateStringWithoutTime),
-      new Date(endDateStringWithoutTime)
-    );
+    const filename = `${title}.ics`;
 
-    const element = document.createElement("a");
-    element.href = calendarData;
-    element.download = `${title}.ics`;
-    document.body.appendChild(element);
-    element.click();
+    const calendarDataUrl = generateCalendarData(
+      new Date(startDateStringWithoutTime),
+      new Date(endDateStringWithoutTime),
+      time,
+      timeEnd
+    );
+  
+    // Check if the device is a mobile screen
+    if (window.innerWidth <= 767) {
+      const downloadLink = generateCalendarData(
+        new Date(startDateStringWithoutTime),
+        new Date(endDateStringWithoutTime),
+        time,
+        timeEnd
+      );
+  
+      window.open(downloadLink, '_blank');
+    } else {
+      const downloadLink = document.createElement('a');
+      downloadLink.href = calendarDataUrl;
+      downloadLink.download = filename;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      setTimeout(() => {
+        window.URL.revokeObjectURL(calendarDataUrl);
+      }, 1000);
+    }
   };
 
 
@@ -156,6 +179,7 @@ END:VCALENDAR
           <Text>
             {date && date}
             {time && <>, {time}</>}
+            {timeEnd && <>, {timeEnd}</>}
             {dateEnd && <> - {dateEnd}</>}
           </Text>
         )}
