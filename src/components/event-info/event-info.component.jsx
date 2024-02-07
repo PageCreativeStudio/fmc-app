@@ -36,10 +36,11 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
   };
   
 
+
   const generateCalendarData = (startDate, endDate) => {
     const formattedStartDate = formatICSDate(startDate, time);
     const formattedEndDate = formatICSDate(endDate, time);
-  
+
     const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
@@ -47,14 +48,16 @@ BEGIN:VEVENT
 SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
-DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-    `.trim();
+  `.trim();
   
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
   };
+  
+  
+  
   
 
   const handleDownload = () => {
@@ -108,41 +111,25 @@ END:VCALENDAR
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-  const filename = `${title}.ics`;
-
-  const calendarData = generateCalendarData(
-    new Date(startDateStringWithoutTime),
-    new Date(endDateStringWithoutTime),
-    time,
-    timeEnd
-  );
-
-  // Create a Blob for the calendar data
-  const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-
-  // For mobile, create a data URI and open a new tab
-  if (window.innerWidth <= 767) {
-    const dataUri = URL.createObjectURL(blob);
-    const newWindow = window.open(dataUri, '_blank');
+    const calendarDataUrl = generateCalendarData(
+      new Date(startDateStringWithoutTime),
+      new Date(endDateStringWithoutTime),
+      time, 
+      timeEnd 
+    );
+  
+    // Open a new window with the data URI
+    const newWindow = window.open(calendarDataUrl, '_blank');
     if (!newWindow) {
-      // Handling popup blocking
-      alert('Please allow pop-ups to download the calendar event.');
+      // If the new window is blocked (common on iOS), provide instructions to the user
+      alert('Please allow pop-ups for this site to download the file.');
     }
-  } else {
-    // For desktop, create a download link and trigger the click
-    const downloadLink = document.createElement('a');
-    downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = filename;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-  }
-
-  // Cleanup: revoke the object URL after a short delay
-  setTimeout(() => {
-    URL.revokeObjectURL(blob);
-  }, 1000);
-};
+  
+    // Release the Blob URL after a short delay to allow the download to start
+    setTimeout(() => {
+      window.URL.revokeObjectURL(calendarDataUrl);
+    }, 1000);
+  };
 
 
 
