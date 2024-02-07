@@ -110,6 +110,10 @@ END:VCALENDAR
 
     const filename = `${title}.ics`;
 
+    console.log("startDateStringWithoutTime:", startDateStringWithoutTime);
+    console.log("endDateStringWithoutTime:", endDateStringWithoutTime);
+
+
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
@@ -198,7 +202,7 @@ END:VCALENDAR
         )}
         <Flex>
           <Text style={{ marginTop: "1.5rem", fonSize: "19px", textDecoration: "underline 2px #e23734", textUnderlineOffset: "5px" }}>
-            <a style={{ color: "#e23734", fontWeight: 400, position: "absolute", zIndex: 9999}} href="#" onClick={handleDownload}>
+            <a style={{ color: "#e23734", fontWeight: 400}} href="#" onClick={handleDownload}>
               iCal Download
             </a>
           </Text>
