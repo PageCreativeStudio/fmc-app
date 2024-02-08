@@ -36,6 +36,9 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         // Adjust to London time zone
         const londonOffset = 60; // London is UTC+0 or UTC+1 (during daylight saving time)
         dateObj.setMinutes(dateObj.getMinutes() + londonOffset);
+  
+        // Ensure the date is set to the correct day (adjusting for potential daylight saving time)
+        dateObj.setDate(dateObj.getDate() + 1);
     }
 
     const year = dateObj.getUTCFullYear();
