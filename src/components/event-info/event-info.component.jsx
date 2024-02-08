@@ -10,29 +10,30 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       return "";
     }
     const dateObj = new Date(date);
-
-    // Check if time is available
+  
     if (time) {
-      // Extract hours, minutes, and AM/PM from the time
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
-      if (!timeParts) {
-        // If time format doesn't match, return the formatted date without any time
-        return dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z").substring(0, 8);
+      if (timeParts) {
+        let hours = parseInt(timeParts[1], 10);
+        const minutes = parseInt(timeParts[2], 10);
+        const period = timeParts[3].toLowerCase();
+  
+        if (period === "pm" && hours !== 12) {
+          hours += 12;
+        }
+  
+        dateObj.setHours(hours, minutes);
       }
-      let hours = parseInt(timeParts[1], 10);
-      const minutes = parseInt(timeParts[2], 10);
-      const period = timeParts[3].toLowerCase();
-      // Adjust hours if PM and not 12 PM
-      if (period === "pm" && hours !== 12) {
-        hours += 12;
-      }
-      // Set the time
-      dateObj.setHours(hours, minutes);
     }
-
-    // Format the date and time as "YYYYMMDDTHHMMSSZ"
-    const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
-    return formattedDate;
+  
+    const year = dateObj.getUTCFullYear();
+    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+  
+    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   };
   
 
