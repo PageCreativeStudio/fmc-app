@@ -46,12 +46,12 @@ VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
 SUMMARY:${title}
-DTSTART:${formattedStartDate}
-DTEND:${formattedEndDate}
+DTSTART;TZID=Europe/London:${formattedStartDate}
+DTEND;TZID=Europe/London:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-    `.trim();
+`.trim();
   
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
