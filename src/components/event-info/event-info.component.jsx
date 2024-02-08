@@ -9,10 +9,12 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     if (!date) {
       return "";
     }
+  
     const dateObj = new Date(date);
   
     if (time) {
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
+  
       if (timeParts) {
         let hours = parseInt(timeParts[1], 10);
         const minutes = parseInt(timeParts[2], 10);
@@ -23,18 +25,22 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         }
   
         dateObj.setHours(hours, minutes);
+      } else {
+        console.error(`Failed to parse time: ${time}`);
       }
+    } else {
+      // If no time is available, set hours and minutes to 0
+      dateObj.setHours(0, 0);
     }
   
-    const year = dateObj.getUTCFullYear();
-    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
-    const day = dateObj.getUTCDate().toString().padStart(2, '0');
-    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
-    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+    // Format the date with "T" between the date and time and remove seconds
+    const formattedDate = dateObj.toISOString().slice(0, 19).replace(/[-:]/g, '');
   
-    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+    // If time is not available, remove the T and everything after it
+    return time ? formattedDate : formattedDate.slice(0, 8);
   };
+  
+  
   
 
   const generateCalendarData = (startDate, endDate) => {
@@ -46,12 +52,12 @@ VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
 SUMMARY:${title}
-DTSTART;TZID=Europe/London:${formattedStartDate}
-DTEND;TZID=Europe/London:${formattedEndDate}
+DTSTART:${formattedStartDate}
+DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-`.trim();
+    `.trim();
   
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
@@ -63,13 +69,11 @@ END:VCALENDAR
       // Handle missing date and dateEnd
       return;
     }
-  
-    const filename = `${title}.ics`;
-  
+
     // Parse the event date and dateEnd strings in the "Sunday 10th September 2023" format
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
-  
+
     const months = {
       January: '01',
       February: '02',
@@ -84,25 +88,25 @@ END:VCALENDAR
       November: '11',
       December: '12',
     };
-  
+
     // Initialize the start and end date strings without time
     let startDateStringWithoutTime;
     let endDateStringWithoutTime;
-  
+
     if (startDateString.length === 4) {
       startDateStringWithoutTime = `${startDateString[3]}-${months[startDateString[2]]}-${startDateString[1].slice(0, -2)}`;
     }
-  
+
     if (endDateString.length === 4) {
       endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}`;
     }
-  
+
     // Check if time is available and append it if present
     if (startDateString.length === 5) {
       const startTime = startDateString[4].split(":");
       startDateStringWithoutTime += `T${startTime[0].padStart(2, '0')}${startTime[1].padStart(2, '0')}`;
     }
-  
+
     if (endDateString.length === 5) {
       const endTime = endDateString[4].split(":");
       endDateStringWithoutTime += `T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
@@ -110,7 +114,9 @@ END:VCALENDAR
       // If no time is available and there's no dateEnd, set endDateStringWithoutTime to startDateStringWithoutTime
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
-  
+
+    const filename = `${title}.ics`;
+
     const calendarDataUrl = generateCalendarData(
       new Date(startDateStringWithoutTime),
       new Date(endDateStringWithoutTime),
@@ -118,28 +124,28 @@ END:VCALENDAR
       timeEnd
     );
   
-    // Check if the device is an iPhone (iOS)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // Check if the device is a mobile screen
+    if (window.innerWidth <= 767) {
+      const downloadLink = generateCalendarData(
+        new Date(startDateStringWithoutTime),
+        new Date(endDateStringWithoutTime),
+        time,
+        timeEnd
+      );
   
-    if (isIOS) {
-      // For iPhones, open the download link in a new tab
-      window.open(calendarDataUrl, '_blank');
+      window.open(downloadLink, '_blank');
     } else {
-      // For other devices, create a temporary link to trigger the download
       const downloadLink = document.createElement('a');
       downloadLink.href = calendarDataUrl;
       downloadLink.download = filename;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-  
-      // Release the Blob URL after a short delay to allow the download to start
       setTimeout(() => {
         window.URL.revokeObjectURL(calendarDataUrl);
       }, 1000);
     }
   };
-  
 
 
 
