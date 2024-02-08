@@ -55,11 +55,17 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
 
 
 
-  const generateCalendarData = (startDate, endDate) => {
-    const formattedStartDate = formatICSDate(startDate, time);
-    const formattedEndDate = formatICSDate(endDate, time);
-  
-    const calendarData = `BEGIN:VCALENDAR
+
+const generateCalendarData = (startDate, endDate) => {
+  if (!startDate && !endDate) {
+    // Handle missing date and dateEnd
+    return "";
+  }
+
+  const formattedStartDate = formatICSDate(startDate, time);
+  const formattedEndDate = formatICSDate(endDate, timeEnd);
+
+  const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
@@ -69,11 +75,27 @@ DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-    `.trim();
-  
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
-  };
+  `.trim();
+
+  const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+  const filename = `${title}.ics`;
+
+  if (window.innerWidth <= 767) {
+    const downloadLink = window.URL.createObjectURL(blob);
+    window.open(downloadLink, '_blank');
+  } else {
+    const downloadLink = document.createElement('a');
+    downloadLink.href = window.URL.createObjectURL(blob);
+    downloadLink.download = filename;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  }
+
+  setTimeout(() => {
+    window.URL.revokeObjectURL(window.URL.createObjectURL(blob));
+  }, 1000);
+};
   
 
   const handleDownload = () => {
