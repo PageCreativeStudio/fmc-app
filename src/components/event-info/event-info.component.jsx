@@ -75,17 +75,10 @@ END:VCALENDAR
   const filename = `${title}.ics`;
 
   if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
-    // For iOS devices, use Safari's download method
-    const reader = new FileReader();
-    reader.onload = function () {
-      const link = document.createElement('a');
-      link.href = reader.result;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-    reader.readAsDataURL(blob);
+    // For iOS devices, log the calendar data to console
+    console.log('iOS calendar data:', calendarData);
+    console.log('iOS userAgent:', navigator.userAgent);
+    alert('iOS device detected. Check console for calendar data.');
   } else {
     // For other devices, use the standard download method
     const downloadLink = document.createElement('a');
