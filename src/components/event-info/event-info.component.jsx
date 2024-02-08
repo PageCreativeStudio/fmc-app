@@ -51,15 +51,13 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
 
 
 const generateCalendarData = (startDate, endDate) => {
-  const formattedStartDate = formatICSDate(startDate, time);
-  const formattedEndDate = formatICSDate(endDate, time);
+    const formattedStartDate = formatICSDate(startDate, time);
+    const formattedEndDate = formatICSDate(endDate, time);
 
-  if (!formattedStartDate || !formattedEndDate) {
-    console.error(`Invalid date or time for event: ${title}`);
-    return;
-  }
+    console.log("Formatted Start Date:", formattedStartDate);
+    console.log("Formatted End Date:", formattedEndDate);
 
-  const calendarData = `BEGIN:VCALENDAR
+    const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
@@ -69,29 +67,12 @@ DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-  `.trim();
+    `.trim();
 
-  const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-  const filename = `${title}.ics`;
+    console.log("Calendar Data:", calendarData);
 
-  if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
-    // For iOS devices, log the calendar data to console
-    console.log('iOS calendar data:', calendarData);
-    console.log('iOS userAgent:', navigator.userAgent);
-    alert('iOS device detected. Check console for calendar data.');
-  } else {
-    // For other devices, use the standard download method
-    const downloadLink = document.createElement('a');
-    downloadLink.href = window.URL.createObjectURL(blob);
-    downloadLink.download = filename;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-  }
-
-  setTimeout(() => {
-    window.URL.revokeObjectURL(blob);
-  }, 1000);
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    return window.URL.createObjectURL(blob);
 };
 
   
