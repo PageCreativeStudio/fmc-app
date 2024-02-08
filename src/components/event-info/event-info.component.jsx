@@ -51,13 +51,10 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
 
 
 const generateCalendarData = (startDate, endDate) => {
-    const formattedStartDate = formatICSDate(startDate, time);
-    const formattedEndDate = formatICSDate(endDate, time);
+  const formattedStartDate = formatICSDate(startDate, time);
+  const formattedEndDate = formatICSDate(endDate, time);
 
-    console.log("Formatted Start Date:", formattedStartDate);
-    console.log("Formatted End Date:", formattedEndDate);
-
-    const calendarData = `BEGIN:VCALENDAR
+  const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
@@ -67,12 +64,10 @@ DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-    `.trim();
+  `.trim();
 
-    console.log("Calendar Data:", calendarData);
-
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
+  const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+  return window.URL.createObjectURL(blob);
 };
 
   
