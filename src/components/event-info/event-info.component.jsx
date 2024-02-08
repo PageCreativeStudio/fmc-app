@@ -32,6 +32,10 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     } else {
         // If no time is available, set hours, minutes, seconds, and milliseconds to 0 (midnight)
         dateObj.setHours(0, 0, 0, 0);
+
+        // Adjust to London time zone
+        const londonOffset = 60; // London is UTC+0 or UTC+1 (during daylight saving time)
+        dateObj.setMinutes(dateObj.getMinutes() + londonOffset);
     }
 
     const year = dateObj.getUTCFullYear();
@@ -41,7 +45,8 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
     const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
 
-    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+    // If time is available, include the time; otherwise, only include the date
+    return time ? `${year}${month}${day}T${hours}${minutes}${seconds}Z` : `${year}${month}${day}`;
 };
 
 
