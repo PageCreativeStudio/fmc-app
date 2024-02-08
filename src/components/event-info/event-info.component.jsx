@@ -30,9 +30,14 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       dateObj.setHours(hours, minutes);
     }
 
-    // Format the date and time as "YYYYMMDDTHHMMSSZ"
-    const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
-    return formattedDate;
+    const year = dateObj.getUTCFullYear();
+    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+
+    return time ? `${year}${month}${day}T${hours}${minutes}${seconds}Z` : `${year}${month}${day}`;
   };
   
 
