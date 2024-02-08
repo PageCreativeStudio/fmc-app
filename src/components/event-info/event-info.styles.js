@@ -15,7 +15,7 @@ const contentWrapperStyling = (props) => css`
   @media screen and (max-width: 900px) {
     padding: ${props.theme.spacing[1]} ${props.theme.spacing[1]};
     overflow-y: scroll;
-    height: 60vh;
+    height: 100%;
   }
 `
 
