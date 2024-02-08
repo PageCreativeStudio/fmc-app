@@ -50,13 +50,16 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
 };
 
 
+const generateCalendarData = (startDate, endDate) => {
+  const formattedStartDate = formatICSDate(startDate, time);
+  const formattedEndDate = formatICSDate(endDate, time);
 
+  if (!formattedStartDate || !formattedEndDate) {
+    console.error(`Invalid date or time for event: ${title}`);
+    return;
+  }
 
-  const generateCalendarData = (startDate, endDate) => {
-    const formattedStartDate = formatICSDate(startDate, time);
-    const formattedEndDate = formatICSDate(endDate, time);
-  
-    const calendarData = `BEGIN:VCALENDAR
+  const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
@@ -66,11 +69,38 @@ DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR
-    `.trim();
-  
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
-  };
+  `.trim();
+
+  const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+  const filename = `${title}.ics`;
+
+  if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
+    // For iOS devices, use Safari's download method
+    const reader = new FileReader();
+    reader.onload = function () {
+      const link = document.createElement('a');
+      link.href = reader.result;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+    reader.readAsDataURL(blob);
+  } else {
+    // For other devices, use the standard download method
+    const downloadLink = document.createElement('a');
+    downloadLink.href = window.URL.createObjectURL(blob);
+    downloadLink.download = filename;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  }
+
+  setTimeout(() => {
+    window.URL.revokeObjectURL(blob);
+  }, 1000);
+};
+
   
 
   const handleDownload = () => {
