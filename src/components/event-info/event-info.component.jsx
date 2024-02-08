@@ -5,43 +5,47 @@ import { withTheme } from "@emotion/react";
 
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
 
+
   const formatICSDate = (date, time) => {
     if (!date) {
-      return "";
+        return "";
     }
-  
+
     const dateObj = new Date(date);
-  
+
     if (time) {
-      const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
-  
-      if (timeParts) {
-        let hours = parseInt(timeParts[1], 10);
-        const minutes = parseInt(timeParts[2], 10);
-        const period = timeParts[3].toLowerCase();
-  
-        if (period === "pm" && hours !== 12) {
-          hours += 12;
+        const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
+
+        if (timeParts) {
+            let hours = parseInt(timeParts[1], 10);
+            const minutes = parseInt(timeParts[2], 10);
+            const period = timeParts[3].toLowerCase();
+
+            if (period === "pm" && hours !== 12) {
+                hours += 12;
+            }
+
+            dateObj.setHours(hours, minutes);
+        } else {
+            console.error(`Failed to parse time: ${time}`);
         }
-  
-        dateObj.setHours(hours, minutes);
-      } else {
-        console.error(`Failed to parse time: ${time}`);
-      }
     } else {
-      // If no time is available, set hours and minutes to 0
-      dateObj.setHours(0, 0);
+        // If no time is available, set hours, minutes, seconds, and milliseconds to 0 (midnight)
+        dateObj.setHours(0, 0, 0, 0);
     }
-  
-    // Format the date with "T" between the date and time and remove seconds
-    const formattedDate = dateObj.toISOString().slice(0, 19).replace(/[-:]/g, '');
-  
-    // If time is not available, remove the T and everything after it
-    return time ? formattedDate : formattedDate.slice(0, 8);
-  };
-  
-  
-  
+
+    const year = dateObj.getUTCFullYear();
+    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+
+    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+};
+
+
+
 
   const generateCalendarData = (startDate, endDate) => {
     const formattedStartDate = formatICSDate(startDate, time);
