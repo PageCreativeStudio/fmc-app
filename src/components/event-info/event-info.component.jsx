@@ -55,7 +55,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
 const generateCalendarData = (startDate, endDate) => {
   if (!startDate && !endDate) {
     // Handle missing date and dateEnd
-    return "";
+    return;
   }
 
   const formattedStartDate = formatICSDate(startDate, time);
@@ -76,10 +76,20 @@ END:VCALENDAR
   const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
   const filename = `${title}.ics`;
 
-  if (window.innerWidth <= 767) {
-    const downloadLink = window.URL.createObjectURL(blob);
-    window.open(downloadLink, '_blank');
+  if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
+    // For iOS devices, use Safari's download method
+    const reader = new FileReader();
+    reader.onload = function () {
+      const link = document.createElement('a');
+      link.href = reader.result;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+    reader.readAsDataURL(blob);
   } else {
+    // For other devices, use the standard download method
     const downloadLink = document.createElement('a');
     downloadLink.href = window.URL.createObjectURL(blob);
     downloadLink.download = filename;
@@ -92,6 +102,7 @@ END:VCALENDAR
     window.URL.revokeObjectURL(window.URL.createObjectURL(blob));
   }, 1000);
 };
+
 
   
 
