@@ -33,9 +33,12 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         dateObj.setHours(0, 0, 0, 0);
 
         // Adjust to London time zone
-        const londonOffset = 0; // London is UTC+0 or UTC+1 (during daylight saving time)
+        const londonOffset = 1; // London is UTC+0 or UTC+1 (during daylight saving time)
         dateObj.setMinutes(dateObj.getMinutes() + londonOffset);
     }
+
+    // Format the date and time as "YYYYMMDDTHHMMSSZ"
+    const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
 
     const year = dateObj.getUTCFullYear();
     const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -44,10 +47,12 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
     const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
 
-    // Format the date and time as "YYYYMMDDTHHMMSSZ"
-    const formattedDate = `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
-    return formattedDate;
+    // If time is available, include the time; otherwise, only include the date
+    return time ? `${year}${month}${day}T${hours}${minutes}${seconds}Z` : formattedDate;
 };
+
+
+
 
 
   const generateCalendarData = (startDate, endDate) => {
