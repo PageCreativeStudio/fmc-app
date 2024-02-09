@@ -30,10 +30,10 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         }
     } else {
         // If no time is available, set hours, minutes, seconds, and milliseconds to 0 (midnight)
-        dateObj.setHours(1, 0, 0, 0);
+        dateObj.setHours(0, 0, 9, 9);
 
         // Adjust to London time zone
-        const londonOffset = 0; // London is UTC+0 or UTC+1 (during daylight saving time)
+        const londonOffset = 0.9; // London is UTC+0 or UTC+1 (during daylight saving time)
         dateObj.setMinutes(dateObj.getMinutes() + londonOffset);
     }
 
@@ -44,41 +44,32 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
     const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
 
-    // Conditionally include time only if it's available
-    const formattedTime = time ? `T${hours}${minutes}${seconds}Z` : '';
-
     // Format the date and time as "YYYYMMDDTHHMMSSZ"
-    const formattedDate = `${year}${month}${day}${formattedTime}`;
+    const formattedDate = `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
     return formattedDate;
 };
 
 
 
-
-const generateCalendarData = (startDate, endDate) => {
-  const formattedStartDate = formatICSDate(startDate, time);
-  const formattedEndDate = formatICSDate(endDate, time);
-
-  // Check if it's an all-day event
-  const isAllDayEvent = !time && !timeEnd;
-
-  const calendarData = `BEGIN:VCALENDAR
+  const generateCalendarData = (startDate, endDate) => {
+    const formattedStartDate = formatICSDate(startDate, time);
+    const formattedEndDate = formatICSDate(endDate, time);
+  
+    const calendarData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:CALENDAR
 BEGIN:VEVENT
 SUMMARY:${title}
-DTSTART${isAllDayEvent ? ';VALUE=DATE' : ''}:${formattedStartDate}
-DTEND${isAllDayEvent ? ';VALUE=DATE' : ''}:${formattedEndDate}
+DTSTART:${formattedStartDate}
+DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
-${isAllDayEvent ? 'STATUS:CONFIRMED\nTRANSP:TRANSPARENT' : ''}
 END:VEVENT
 END:VCALENDAR
-  `.trim();
-
-  const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-  return window.URL.createObjectURL(blob);
-};
-
+    `.trim();
+  
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    return window.URL.createObjectURL(blob);
+  };
   
 
   const handleDownload = () => {
