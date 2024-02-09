@@ -37,9 +37,6 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         dateObj.setMinutes(dateObj.getMinutes() + londonOffset);
     }
 
-    // Format the date and time as "YYYYMMDDTHHMMSSZ"
-    const formattedDate = dateObj.toISOString().replace(/[:-]/g, "").replace(/\.000Z$/, "Z");
-
     const year = dateObj.getUTCFullYear();
     const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
     const day = dateObj.getUTCDate().toString().padStart(2, '0');
@@ -47,9 +44,11 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
     const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
 
-    // If time is available, include the time; otherwise, only include the date
-    return time ? `${year}${month}${day}T${hours}${minutes}${seconds}Z` : formattedDate;
+    // Format the date and time as "YYYYMMDDTHHMMSSZ"
+    const formattedDate = `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+    return formattedDate;
 };
+
 
 
   const generateCalendarData = (startDate, endDate) => {
