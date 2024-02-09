@@ -30,7 +30,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         }
     } else {
         // If no time is available, set hours, minutes, seconds, and milliseconds to 0 (midnight)
-        dateObj.setHours(1, 0, 0, 0);
+        dateObj.setHours(0, 0, 0, 0);
 
         // Adjust to London time zone
         const londonOffset = 0; // London is UTC+0 or UTC+1 (during daylight saving time)
