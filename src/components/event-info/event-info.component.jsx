@@ -144,21 +144,27 @@ END:VCALENDAR
       window.open(downloadLink, '_blank');
     } else {
       
-      const downloadLink = document.createElement('a');
-      downloadLink.href = calendarDataUrl;
-      downloadLink.download = filename;
+      const downloadLink = generateCalendarData(
+        new Date(startDateStringWithoutTime),
+        new Date(endDateStringWithoutTime),
+        time,
+        timeEnd
+      );
   
-      // Use try-catch to handle potential issues with Safari
-      try {
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-      } catch (error) {
-        console.error("Error triggering click:", error);
-      }
-  
+       // Create a temporary link element for downloading
+      const tempLink = document.createElement('a');
+      tempLink.href = downloadLink;
+      tempLink.download = `${title}.ics`; // Set the filename with the event name
+      tempLink.style.display = 'none';
+
+      // Append the link to the body, trigger the click, and remove the link
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+
+      // Revoke the object URL after a delay
       setTimeout(() => {
-        window.URL.revokeObjectURL(calendarDataUrl);
+        window.URL.revokeObjectURL(downloadLink);
       }, 1000);
     }
   };
