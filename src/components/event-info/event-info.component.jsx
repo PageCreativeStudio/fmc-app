@@ -151,21 +151,7 @@ END:VCALENDAR
         timeEnd
       );
   
-       // Create a temporary link element for downloading
-      const tempLink = document.createElement('a');
-      tempLink.href = downloadLink;
-      tempLink.download = `${title}.ics`; // Set the filename with the event name
-      tempLink.style.display = 'none';
-
-      // Append the link to the body, trigger the click, and remove the link
-      document.body.appendChild(tempLink);
-      tempLink.click();
-      document.body.removeChild(tempLink);
-
-      // Revoke the object URL after a delay
-      setTimeout(() => {
-        window.URL.revokeObjectURL(downloadLink);
-      }, 1000);
+       window.open(downloadLink, '_blank');
     }
   };
 
