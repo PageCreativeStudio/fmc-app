@@ -143,12 +143,20 @@ END:VCALENDAR
   
       window.open(downloadLink, '_blank');
     } else {
+      
       const downloadLink = document.createElement('a');
       downloadLink.href = calendarDataUrl;
       downloadLink.download = filename;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+  
+      // Use try-catch to handle potential issues with Safari
+      try {
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      } catch (error) {
+        console.error("Error triggering click:", error);
+      }
+  
       setTimeout(() => {
         window.URL.revokeObjectURL(calendarDataUrl);
       }, 1000);
