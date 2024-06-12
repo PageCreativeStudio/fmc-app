@@ -24,10 +24,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
     if (!filteredEvents) return
     const calendarInstace = window.ics();
     filteredEvents.forEach(event => {
-      // Parse dates explicitly in a supported format
-      const startDate = new Date(`${event.acf.date_from}T${event.acf.time || '00:00'}`);
-      const endDate = new Date(`${event.acf.date_to || event.acf.date_from}T${event.acf.time_end || '00:00'}`);
-      calendarInstace.addEvent(event.acf.title, event.acf.description, "", startDate, endDate);
+      calendarInstace.addEvent(event.acf.title, event.acf.description, "", `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`);
     });
     setCalendar(calendarInstace)
   }, [filteredEvents])
@@ -52,7 +49,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
       {email && <a href={`mailto:${email}`}><Text primary={primary}>{email}</Text></a>}
       {filteredEvents && <EventsWrapper onClick={() => setShow(true)} marginTop="1rem">
         <img style={{ width: '2.5rem', marginRight: '0.5rem' }} alt="calendar" src={cal} />
-        <TextBold primary={primary}>Upcoming Eventsz</TextBold>
+        <TextBold primary={primary}>Upcoming Events</TextBold>
         <Events show={show}>
           {filteredEvents.map(event => (
             <Flex marginBottom="0.5rem" key={event.id}>
@@ -66,7 +63,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
             </Flex>
           ))}
           <Link onClick={onDownloadClick} primary={primary}>
-            Download now
+            Download
           </Link>
         </Events>
       </EventsWrapper>
