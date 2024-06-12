@@ -4,13 +4,14 @@ import { Wrapper, Title, Text, SmallText, Image, TextBold, Circle, EventsWrapper
 import cal from '../../assets/images/calendar.png'
 
 // Helper function to format date for ICS file
-const formatDateForICS = (date) => {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
+const formatDateForICS = (dateString) => {
+  const date = new Date(dateString);
+  const year = date.getUTCFullYear();
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  const seconds = date.getUTCSeconds().toString().padStart(2, '0');
   return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
 };
 
@@ -38,8 +39,8 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
         event.acf.title,
         event.acf.description,
         "",
-        formatDateForICS(new Date(`${event.acf.date_from}T${event.acf.time ? event.acf.time : '00:00'}`)),
-        formatDateForICS(new Date(`${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end ? event.acf.time_end : '00:00'}`))
+        formatDateForICS(`${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`),
+        formatDateForICS(`${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`)
       );
     });
     setCalendar(calendarInstance)
