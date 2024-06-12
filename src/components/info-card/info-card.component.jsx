@@ -2,12 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Flex, Box } from "reflexbox";
 import { Wrapper, Title, Text, SmallText, Image, TextBold, Circle, EventsWrapper, Events, Link } from "./info-card.styles";
 import cal from '../../assets/images/calendar.png';
-import { parseISO, format } from "date-fns";
+import formatDate from "../../helpers/format-date";
 
 const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, image, events }) => {
   const [show, setShow] = useState(false);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [calendar, setCalendar] = useState(null);
+
+  const formatICSDate = (dateStr, timeStr) => {
+    const date = new Date(`${dateStr}T${timeStr || '00:00'}`);
+    return date.toISOString().replace(/-|:|\.\d+/g, '');
+  };
 
   useEffect(() => {
     if (!events) return;
@@ -27,8 +32,8 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
 
     const calendarInstance = window.ics();
     filteredEvents.forEach(event => {
-      const startDate = new Date(`${event.acf.date_from}T${event.acf.time || '00:00'}`).toISOString().replace(/-|:|\.\d+/g, '');
-      const endDate = new Date(`${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end || '00:00'}`).toISOString().replace(/-|:|\.\d+/g, '');
+      const startDate = formatICSDate(event.acf.date_from, event.acf.time);
+      const endDate = formatICSDate(event.acf.date_to ? event.acf.date_to : event.acf.date_from, event.acf.time_end);
 
       calendarInstance.addEvent(
         event.acf.title,
@@ -71,7 +76,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
               <Circle color={event.acf.category[0]?.acf.colour} />
               <Flex flexDirection="column">
                 <SmallText primary={primary}>
-                  {`${format(parseISO(event.acf.date_from), 'dd MMM yyyy')} ${event.acf.time || ''}`}
+                  {`${formatDate(event.acf.date_from)} ${event.acf.time}`}
                 </SmallText>
                 <Text primary={primary}>{event.acf.title}</Text>
               </Flex>
