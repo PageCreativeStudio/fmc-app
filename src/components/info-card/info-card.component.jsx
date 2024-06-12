@@ -52,7 +52,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
       {email && <a href={`mailto:${email}`}><Text primary={primary}>{email}</Text></a>}
       {filteredEvents && <EventsWrapper onClick={() => setShow(true)} marginTop="1rem">
         <img style={{ width: '2.5rem', marginRight: '0.5rem' }} alt="calendar" src={cal} />
-        <TextBold primary={primary}>Upcoming Events</TextBold>
+        <TextBold primary={primary}>Upcoming Eventsz</TextBold>
         <Events show={show}>
           {filteredEvents.map(event => (
             <Flex marginBottom="0.5rem" key={event.id}>
