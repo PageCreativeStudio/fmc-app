@@ -6,31 +6,39 @@ import { parseISO, format } from "date-fns";
 
 const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, image, events }) => {
   const [show, setShow] = useState(false);
-  const [filteredEvents, setFilteredEvents] = useState(null);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [calendar, setCalendar] = useState(null);
 
   useEffect(() => {
     if (!events) return;
-    setFilteredEvents(events.sort((a, b) => {
-      return new Date(`${a.acf.date_from}T${a.acf.time}:00`) - new Date(`${b.acf.date_from}T${b.acf.time_end ? b.acf.time_end : '00:00'}:00`);
+
+    const sortedEvents = events.sort((a, b) => {
+      return new Date(`${a.acf.date_from}T${a.acf.time || '00:00'}`) - new Date(`${b.acf.date_from}T${b.acf.time || '00:00'}`);
     }).filter(event => {
       const currentDate = new Date();
-      return currentDate.getTime() <= new Date(`${event.acf.date_from}T${event.acf.time}:00`).getTime();
-    }));
+      return currentDate.getTime() <= new Date(`${event.acf.date_from}T${event.acf.time || '00:00'}`).getTime();
+    });
+
+    setFilteredEvents(sortedEvents);
   }, [events]);
 
   useEffect(() => {
-    if (!filteredEvents) return;
+    if (filteredEvents.length === 0) return;
+
     const calendarInstance = window.ics();
     filteredEvents.forEach(event => {
+      const startDate = format(parseISO(`${event.acf.date_from}T${event.acf.time || '00:00'}`), "yyyyMMdd'T'HHmmss'Z'");
+      const endDate = format(parseISO(`${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end || '00:00'}`), "yyyyMMdd'T'HHmmss'Z'");
+
       calendarInstance.addEvent(
         event.acf.title,
         event.acf.description || "",
         "",
-        `${event.acf.date_from}T${event.acf.time || '00:00'}:00`,
-        `${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end ? event.acf.time_end : '00:00'}:00`
+        startDate,
+        endDate
       );
     });
+
     setCalendar(calendarInstance);
   }, [filteredEvents]);
 
@@ -54,7 +62,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
         {phone2 && <Text primary={primary}>{phone2}</Text>}
       </Flex>
       {email && <a href={`mailto:${email}`}><Text primary={primary}>{email}</Text></a>}
-      {filteredEvents && <EventsWrapper onClick={() => setShow(true)} marginTop="1rem">
+      {filteredEvents.length > 0 && <EventsWrapper onClick={() => setShow(true)} marginTop="1rem">
         <img style={{ width: '2.5rem', marginRight: '0.5rem' }} alt="calendar" src={cal} />
         <TextBold primary={primary}>Upcoming Events</TextBold>
         <Events show={show}>
@@ -63,7 +71,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
               <Circle color={event.acf.category[0]?.acf.colour} />
               <Flex flexDirection="column">
                 <SmallText primary={primary}>
-                  {`${format(parseISO(event.acf.date_from), 'dd MMM yyyy')} ${event.acf.time}`}
+                  {`${format(parseISO(event.acf.date_from), 'dd MMM yyyy')} ${event.acf.time || ''}`}
                 </SmallText>
                 <Text primary={primary}>{event.acf.title}</Text>
               </Flex>
