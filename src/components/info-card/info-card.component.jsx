@@ -25,7 +25,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
     filteredEvents.forEach(event => {
       calendarInstance.addEvent(
         event.acf.title,
-        event.acf.description || "", 
+        event.acf.description || "",
         "",
         `${event.acf.date_from}T${event.acf.time || '00:00'}:00`,
         `${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end ? event.acf.time_end : '00:00'}:00`

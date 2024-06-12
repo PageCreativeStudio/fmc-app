@@ -11,6 +11,7 @@
     "@testing-library/react": "^13.2.0",
     "@testing-library/user-event": "^13.5.0",
     "customize-cra": "^1.0.0",
+    "date-fns": "^3.6.0",
     "emotion-reset": "^3.0.1",
     "file-saver": "^2.0.5",
     "ics": "^3.4.0",
