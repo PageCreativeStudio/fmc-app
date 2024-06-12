@@ -27,8 +27,8 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
 
     const calendarInstance = window.ics();
     filteredEvents.forEach(event => {
-      const startDate = format(parseISO(`${event.acf.date_from}T${event.acf.time || '00:00'}`), "yyyyMMdd'T'HHmmss'Z'");
-      const endDate = format(parseISO(`${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end || '00:00'}`), "yyyyMMdd'T'HHmmss'Z'");
+      const startDate = new Date(`${event.acf.date_from}T${event.acf.time || '00:00'}`).toISOString().replace(/-|:|\.\d+/g, '');
+      const endDate = new Date(`${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end || '00:00'}`).toISOString().replace(/-|:|\.\d+/g, '');
 
       calendarInstance.addEvent(
         event.acf.title,
