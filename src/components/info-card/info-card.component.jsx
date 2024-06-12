@@ -1,45 +1,52 @@
 import React, { useEffect, useState } from "react";
 import { Flex, Box } from "reflexbox";
 import { Wrapper, Title, Text, SmallText, Image, TextBold, Circle, EventsWrapper, Events, Link } from "./info-card.styles";
-import cal from '../../assets/images/calendar.png'
-import formatDate from "../../helpers/format-date";
+import cal from '../../assets/images/calendar.png';
+import { parseISO, format } from "date-fns";
 
 const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, image, events }) => {
-
-  const [show, setShow] = useState(false)
-  const [filteredEvents, setFilteredEvents] = useState(null)
-  const [calendar, setCalendar] = useState(null)
+  const [show, setShow] = useState(false);
+  const [filteredEvents, setFilteredEvents] = useState(null);
+  const [calendar, setCalendar] = useState(null);
 
   useEffect(() => {
-    if (!events) return
+    if (!events) return;
     setFilteredEvents(events.sort((a, b) => {
-      return new Date(`${a.acf.date_from}:${a.acf.time}`) - new Date(`${b.acf.date_from}:${b.acf.time_end ? b.acf.time_end : '00:00'}`);
+      return new Date(`${a.acf.date_from}T${a.acf.time}:00`) - new Date(`${b.acf.date_from}T${b.acf.time_end ? b.acf.time_end : '00:00'}:00`);
     }).filter(event => {
-      var currentdate = new Date();
-      return currentdate.getTime() <= new Date(event.acf.date_from).getTime()
-    }))
-  }, [events])
+      const currentDate = new Date();
+      return currentDate.getTime() <= new Date(`${event.acf.date_from}T${event.acf.time}:00`).getTime();
+    }));
+  }, [events]);
 
   useEffect(() => {
-    if (!filteredEvents) return
-    const calendarInstace = window.ics();
+    if (!filteredEvents) return;
+    const calendarInstance = window.ics();
     filteredEvents.forEach(event => {
-      calendarInstace.addEvent(event.acf.title, event.acf.description, "", `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`);
+      calendarInstance.addEvent(
+        event.acf.title,
+        event.acf.description || "",
+        "",
+        `${event.acf.date_from}T${event.acf.time || '00:00'}:00`,
+        `${event.acf.date_to ? event.acf.date_to : event.acf.date_from}T${event.acf.time_end ? event.acf.time_end : '00:00'}:00`
+      );
     });
-    setCalendar(calendarInstace)
-  }, [filteredEvents])
+    setCalendar(calendarInstance);
+  }, [filteredEvents]);
 
   const onDownloadClick = () => {
-    if (!calendar) return
+    if (!calendar) return;
     calendar.download(`${title} FMC Events`);
-  }
+  };
 
   return (
     <Wrapper onClick={() => show && setShow(false)} marginRight={['0', "2rem"]} marginBottom="2rem" flexDirection="column" primary={primary} justifyContent="center" width={width}>
       {image && <Image alt={`Image for ${title}`} src={image} />}
       {title && <Title primary={primary}>{title}</Title>}
       {textList && <Flex marginBottom="1rem" flexWrap="wrap">
-        {textList.map((text, i) => <SmallText primary={primary} key={i} dangerouslySetInnerHTML={{ __html: i !== textList.length - 1 ? `${text}&nbsp&nbsp•&nbsp&nbsp` : text }} />)}
+        {textList.map((text, i) => (
+          <SmallText primary={primary} key={i} dangerouslySetInnerHTML={{ __html: i !== textList.length - 1 ? `${text}&nbsp&nbsp•&nbsp&nbsp` : text }} />
+        ))}
       </Flex>}
       <Flex flexWrap="wrap">
         {phone1 && <Text primary={primary}>{phone1}</Text>}
@@ -56,7 +63,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
               <Circle color={event.acf.category[0]?.acf.colour} />
               <Flex flexDirection="column">
                 <SmallText primary={primary}>
-                  {`${formatDate(event.acf.date_from)} ${event.acf.time}`}
+                  {`${format(parseISO(event.acf.date_from), 'dd MMM yyyy')} ${event.acf.time}`}
                 </SmallText>
                 <Text primary={primary}>{event.acf.title}</Text>
               </Flex>
@@ -66,10 +73,9 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
             Download
           </Link>
         </Events>
-      </EventsWrapper>
-      }
+      </EventsWrapper>}
     </Wrapper>
-  )
-}
+  );
+};
 
 export default InfoCard;
