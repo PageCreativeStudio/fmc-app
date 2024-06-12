@@ -66,7 +66,7 @@ const InfoCard = ({ width, title, textList, phone1, phone2, email, primary, imag
             </Flex>
           ))}
           <Link onClick={onDownloadClick} primary={primary}>
-            Download
+            Download now
           </Link>
         </Events>
       </EventsWrapper>
