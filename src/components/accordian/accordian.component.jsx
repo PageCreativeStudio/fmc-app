@@ -8,6 +8,7 @@ import plus from '../../assets/svgs/plus';
 import { InfoPopup } from '../info-popup';
 import { Events, EventsWrapper, Link, SmallText,Text, TextBold, Circle } from '../info-card/info-card.styles';
 import formatDate from '../../helpers/format-date';
+import moment from 'moment'; // Import moment.js
 
 const Accordian = ({theme, title, children, width="100%", active = false, infoBox, events}) => {
 
@@ -34,26 +35,18 @@ const Accordian = ({theme, title, children, width="100%", active = false, infoBo
   }, [events])
 
   useEffect(() => {
-    if (!filteredEvents) return;
-  
+    if(!filteredEvents) return
     const calendarInstance = window.ics();
-    
+    console.log(filteredEvents)
     filteredEvents.forEach(event => {
-      const startDate = new Date(`${event.acf.date_from} ${event.acf.time || '00:00'}`);
-      const endDate = new Date(`${event.acf.date_to || event.acf.date_from} ${event.acf.time_end || '00:00'}`);
+      // Format dates using moment.js to ensure consistency
+      const startDate = moment(`${event.acf.date_from} ${event.acf.time || '00:00'}`).format('YYYY-MM-DDTHH:mm:ss');
+      const endDate = moment(`${event.acf.date_to || event.acf.date_from} ${event.acf.time_end || '00:00'}`).format('YYYY-MM-DDTHH:mm:ss');
       
-      calendarInstance.addEvent(
-        event.acf.title,
-        event.acf.description,
-        "",
-        startDate.toISOString(), // Ensure ISO 8601 format
-        endDate.toISOString()   // Ensure ISO 8601 format
-      );
+      calendarInstance.addEvent(event.acf.title, event.acf.description, "", startDate, endDate);
     });
-  
     setCalendar(calendarInstance);
-  }, [filteredEvents]);
-  
+  }, [filteredEvents])
   
   const onDownloadClick = () => {
     if (!calendar) return

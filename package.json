@@ -15,7 +15,7 @@
     "emotion-reset": "^3.0.1",
     "file-saver": "^2.0.5",
     "ics": "^3.4.0",
-    "moment": "^2.29.4",
+    "moment": "^2.30.1",
     "moment-timezone": "^0.5.43",
     "polished": "^4.2.2",
     "react": "^18.1.0",
