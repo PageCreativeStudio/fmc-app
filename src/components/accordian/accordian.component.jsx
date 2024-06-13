@@ -7,11 +7,10 @@ import minus from '../../assets/svgs/minus';
 import plus from '../../assets/svgs/plus';
 import { InfoPopup } from '../info-popup';
 import { Events, EventsWrapper, Link, SmallText, Text, TextBold, Circle } from '../info-card/info-card.styles';
+import { parseISO } from 'date-fns'; // Using date-fns for date formatting utilities
 import formatDate from '../../helpers/format-date';
-import { formatISO, parseISO } from 'date-fns'; // Using date-fns for date formatting utilities
 
 const Accordian = ({ theme, title, children, width = "100%", active = false, infoBox, events }) => {
-
   const [isActive, setIsActive] = useState(active);
   const [showCalendar, setShowCalendar] = useState(false);
   const [filteredEvents, setFilteredEvents] = useState(null);
@@ -23,7 +22,7 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
     // Sort and filter events based on date
     const sortedEvents = events
       .sort((a, b) => new Date(`${a.acf.date_from} ${a.acf.time || '00:00'}`) - new Date(`${b.acf.date_from} ${b.acf.time_end || '00:00'}`))
-      .filter(event => new Date(event.acf.date_from).getTime() >= Date.now());
+      .filter(event => parseISO(event.acf.date_from).getTime() >= Date.now());
 
     setFilteredEvents(sortedEvents);
   }, [events]);
@@ -87,7 +86,7 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
                   <Circle color={event.acf.category[0]?.acf.colour} />
                   <Flex flexDirection="column">
                     <SmallText primary={false}>
-                      {`${formatDate(event.acf.date_from)} ${event.acf.time || ''}`}
+                      {`${formatDate(parseISO(event.acf.date_from))} ${event.acf.time || ''}`}
                     </SmallText>
                     <Text primary={false}>{event.acf.title}</Text>
                   </Flex>
