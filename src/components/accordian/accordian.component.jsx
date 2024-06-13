@@ -7,7 +7,6 @@ import minus from '../../assets/svgs/minus';
 import plus from '../../assets/svgs/plus';
 import { InfoPopup } from '../info-popup';
 import { Events, EventsWrapper, Link, SmallText, Text, TextBold, Circle } from '../info-card/info-card.styles';
-import { parseISO } from 'date-fns'; // Using date-fns for date formatting utilities
 import formatDate from '../../helpers/format-date';
 
 const Accordian = ({ theme, title, children, width = "100%", active = false, infoBox, events }) => {
