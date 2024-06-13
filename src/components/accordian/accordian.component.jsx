@@ -7,13 +7,13 @@ import minus from '../../assets/svgs/minus';
 import plus from '../../assets/svgs/plus';
 import { InfoPopup } from '../info-popup';
 import { Events, EventsWrapper, Link, SmallText, Text, TextBold, Circle } from '../info-card/info-card.styles';
-import { parseISO } from 'date-fns'; // Using date-fns for date formatting utilities
+import { parseISO } from 'date-fns';
 import formatDate from '../../helpers/format-date';
 
 const Accordian = ({ theme, title, children, width = "100%", active = false, infoBox, events }) => {
   const [isActive, setIsActive] = useState(active);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [filteredEvents, setFilteredEvents] = useState(null);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [calendar, setCalendar] = useState(null);
 
   useEffect(() => {
@@ -21,14 +21,14 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
 
     // Sort and filter events based on date
     const sortedEvents = events
-      .sort((a, b) => new Date(`${a.acf.date_from} ${a.acf.time || '00:00'}`) - new Date(`${b.acf.date_from} ${b.acf.time_end || '00:00'}`))
-      .filter(event => parseISO(event.acf.date_from).getTime() >= Date.now());
+      .filter(event => event.acf.date_from && parseISO(event.acf.date_from).getTime() >= Date.now())
+      .sort((a, b) => new Date(`${a.acf.date_from} ${a.acf.time || '00:00'}`) - new Date(`${b.acf.date_from} ${b.acf.time_end || '00:00'}`));
 
     setFilteredEvents(sortedEvents);
   }, [events]);
 
   useEffect(() => {
-    if (!filteredEvents) return;
+    if (!filteredEvents.length) return;
 
     // Initialize the ics instance
     const calendarInstance = window.ics();
@@ -76,14 +76,14 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
         </AccordianTitle>
       )}
       <Panel active={isActive}>
-        {filteredEvents && (
+        {filteredEvents.length > 0 && (
           <EventsWrapper onClick={() => setShowCalendar(true)} marginTop="1rem" marginBottom="3rem">
             <img style={{ width: '2.5rem', marginRight: '0.5rem' }} alt="calendar" src={cal} />
             <TextBold primary={false}>Upcoming Events</TextBold>
             <Events show={showCalendar}>
               {filteredEvents.map(event => (
                 <Flex marginBottom="0.5rem" key={event.id}>
-                  <Circle color={event.acf.category[0]?.acf.colour} />
+                  <Circle color={event.acf.category?.[0]?.acf.colour || '#000000'} />
                   <Flex flexDirection="column">
                     <SmallText primary={false}>
                       {`${formatDate(parseISO(event.acf.date_from))} ${event.acf.time || ''}`}
@@ -98,7 +98,7 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
             </Events>
           </EventsWrapper>
         )}
-        {children && children}
+        {children}
       </Panel>
     </Box>
   );
