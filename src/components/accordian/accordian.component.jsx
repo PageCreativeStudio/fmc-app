@@ -26,24 +26,16 @@ const Accordian = ({theme, title, children, width="100%", active = false, infoBo
   useEffect(() => {
     if (!events) return;
   
-    // Function to format date properly
-    const formatDate = (dateStr) => {
-      const [year, month, day] = dateStr.split('-');
-      return new Date(year, month - 1, day); // month - 1 because months are 0-indexed in JavaScript Date
-    };
+    const formattedEvents = events
+      .map(event => ({
+        ...event,
+        dateFrom: new Date(`${event.acf.date_from} ${event.acf.time || '00:00'}`).toLocaleString(),
+        dateTo: new Date(`${event.acf.date_to || event.acf.date_from} ${event.acf.time_end || '00:00'}`).toLocaleString(),
+      }))
+      .sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom))
+      .filter(event => new Date() <= new Date(event.acf.date_from));
   
-    const sortedEvents = events
-      .filter(event => {
-        const currentDate = new Date();
-        return currentDate.getTime() <= formatDate(event.acf.date_from).getTime();
-      })
-      .sort((a, b) => {
-        const dateA = new Date(`${a.acf.date_from} ${a.acf.time || '00:00'}`);
-        const dateB = new Date(`${b.acf.date_from} ${b.acf.time || '00:00'}`);
-        return dateA - dateB;
-      });
-  
-    setFilteredEvents(sortedEvents);
+    setFilteredEvents(formattedEvents);
   }, [events]);
   
 
