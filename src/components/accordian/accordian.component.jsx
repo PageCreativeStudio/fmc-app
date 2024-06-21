@@ -10,7 +10,7 @@ import { Events, EventsWrapper, Link, SmallText, Text, TextBold, Circle } from '
 import formatDate from '../../helpers/format-date';
 
 const Accordian = ({ theme, title, children, width = "100%", active = false, infoBox, events }) => {
-  // setup active state to track if accordian is active so we can conditonally set css styles
+  // setup active state to track if accordian is active so we can conditionally set css styles
   const [isActive, setIsActive] = useState(active);
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -34,38 +34,39 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
 
   useEffect(() => {
     if (!filteredEvents) return;
-    const calendarInstace = window.ics();
+    const calendarInstance = window.ics();
     console.log(filteredEvents);
     filteredEvents.forEach(event => {
-      calendarInstace.addEvent(
-        event.acf.title,
-        event.acf.description,
-        "",
-        `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`,
+      calendarInstance.addEvent(
+        event.acf.title, 
+        event.acf.description, 
+        "", 
+        `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, 
         `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`
       );
     });
-    setCalendar(calendarInstace);
+    setCalendar(calendarInstance);
   }, [filteredEvents]);
 
   const onDownloadClick = () => {
     if (!calendar) return;
 
-    const downloadLink = calendar.download(`${title} FMC Events`, false);
+    const icsData = calendar.build(); // Generate the .ics file content
+    const blob = new Blob([icsData], { type: 'text/calendar' }); // Create a Blob object with the correct MIME type
+    const url = URL.createObjectURL(blob); // Create a URL for the Blob object
 
-    if (window.innerWidth <= 767) {
-      window.open(downloadLink, '_blank');
-    } else {
-      window.location.href = downloadLink;
-    }
+    // Open the URL in a new tab
+    window.open(url, '_blank');
   };
+
+  
 
   return (
     <Box onClick={() => showCalendar && setShowCalendar(false)} marginBottom={theme.spacing[1]} width={width}>
       {title && <AccordianTitle alignItems="center" justifyContent="space-between" onClick={handleOnClick}>
         <Flex alignItems="center">
           {title}
-          {infoBox && <Box marginLeft="1rem">
+          {infoBox &&<Box marginLeft="1rem">
             <InfoPopup width="37rem">
               {infoBox}
             </InfoPopup>
@@ -76,16 +77,16 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
         }
       </AccordianTitle>}
       <Panel active={isActive}>
-        {filteredEvents && <EventsWrapper onClick={() => setShowCalendar(true)} marginTop="1rem" marginBottom="3rem">
-          <img style={{ width: '2.5rem', marginRight: '0.5rem' }} alt="calendar" src={cal} />
+        {filteredEvents &&<EventsWrapper onClick={() => setShowCalendar(true)} marginTop="1rem" marginBottom="3rem">
+          <img style={{width:'2.5rem', marginRight: '0.5rem'}} alt="calendar" src={cal} />
           <TextBold primary={false}>Upcoming Events</TextBold>
-          <Events show={showCalendar}>
-            {filteredEvents.map(event => (
+        <Events show={showCalendar}>
+          {filteredEvents.map(event => (
               <Flex marginBottom="0.5rem" key={event.id}>
-                <Circle color={event.acf.category[0]?.acf.colour} />
+                <Circle color={event.acf.category[0]?.acf.colour} /> 
                 <Flex flexDirection="column">
                   <SmallText primary={false}>
-                    {`${formatDate(event.acf.date_from)} ${event.acf.time}`}
+                    {`${formatDate(event.acf.date_from )} ${event.acf.time}`}
                   </SmallText>
                   <Text primary={false}>{event.acf.title}</Text>
                 </Flex>
@@ -100,7 +101,6 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
         {children && children}
       </Panel>
     </Box>
-  );
-};
-
+  )
+}
 export default withTheme(Accordian);
