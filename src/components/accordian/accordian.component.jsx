@@ -1,69 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import { AccordianTitle, Panel } from './accordian.styles';
 import { Box, Flex } from 'reflexbox';
-import { withTheme } from '@emotion/react';
-import cal from '../../assets/images/calendar.png';
+import { withTheme } from '@emotion/react'
+import cal from '../../assets/images/calendar.png'
 import minus from '../../assets/svgs/minus';
 import plus from '../../assets/svgs/plus';
 import { InfoPopup } from '../info-popup';
 import { Events, EventsWrapper, Link, SmallText, Text, TextBold, Circle } from '../info-card/info-card.styles';
 import formatDate from '../../helpers/format-date';
 
-const Accordian = ({ theme, title, children, width = "100%", active = false, infoBox, events }) => {
+const Accordian = ({theme, title, children, width="100%", active = false, infoBox, events}) => {
+
+  // setup active state to track if accordian is active so we can conditionally set css styles
   const [isActive, setIsActive] = useState(active);
   const [showCalendar, setShowCalendar] = useState(false);
 
+  // Toggle active state when this function is run
   const handleOnClick = () => {
-    setIsActive(!isActive);
-  };
+    setIsActive(!isActive)
+  }
 
-  const [filteredEvents, setFilteredEvents] = useState(null);
-  const [calendar, setCalendar] = useState(null);
+  const [filteredEvents, setFilteredEvents] = useState(null)
+  const [calendar, setCalendar] = useState(null)
 
   useEffect(() => {
-    if (!events) return;
+    if (!events) return
     setFilteredEvents(events.sort((a, b) => {
       return new Date(`${a.acf.date_from}:${a.acf.time}`) - new Date(`${b.acf.date_from}:${b.acf.time_end ? b.acf.time_end : '00:00'}`);
     }).filter(event => {
       var currentdate = new Date();
-      return currentdate.getTime() <= new Date(event.acf.date_from).getTime();
-    }));
-  }, [events]);
+      return currentdate.getTime() <= new Date(event.acf.date_from).getTime()
+    }))
+  }, [events])
 
   useEffect(() => {
-    if (!filteredEvents) return;
+    if(!filteredEvents) return
     const calendarInstance = window.ics();
-    console.log(filteredEvents);
+    console.log(filteredEvents)
     filteredEvents.forEach(event => {
-      calendarInstance.addEvent(
-        event.acf.title, 
-        event.acf.description, 
-        "", 
-        `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, 
-        `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`
-      );
+      calendarInstance.addEvent(event.acf.title, event.acf.description, "", `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`);
     });
-    setCalendar(calendarInstance);
-  }, [filteredEvents]);
-
+    setCalendar(calendarInstance)
+  }, [filteredEvents])
+  
   const onDownloadClick = () => {
     if (!calendar) return;
-
-    const icsData = calendar.build(); // Generate the .ics file content
-    const blob = new Blob([icsData], { type: 'text/calendar' }); // Create a Blob object with the correct MIME type
-    const url = URL.createObjectURL(blob); // Create a URL for the Blob object
-
-    // Create a temporary anchor element
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title} FMC Events.ics`;
-    document.body.appendChild(a); // Append the anchor to the body
-    a.click(); // Programmatically click the anchor
-    document.body.removeChild(a); // Remove the anchor from the body
-
-    // Revoke the Blob URL to free up resources
-    URL.revokeObjectURL(url);
-  };
+    
+    const downloadLink = calendar.download(`${title} FMC Events`);
+    window.open(downloadLink, '_blank');
+  }
 
   return (
     <Box onClick={() => showCalendar && setShowCalendar(false)} marginBottom={theme.spacing[1]} width={width}>
