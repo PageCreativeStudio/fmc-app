@@ -10,11 +10,9 @@ import { Events, EventsWrapper, Link, SmallText, Text, TextBold, Circle } from '
 import formatDate from '../../helpers/format-date';
 
 const Accordian = ({ theme, title, children, width = "100%", active = false, infoBox, events }) => {
-  // setup active state to track if accordian is active so we can conditionally set css styles
   const [isActive, setIsActive] = useState(active);
   const [showCalendar, setShowCalendar] = useState(false);
 
-  // Toggle active state when this function is run
   const handleOnClick = () => {
     setIsActive(!isActive);
   };
@@ -55,11 +53,17 @@ const Accordian = ({ theme, title, children, width = "100%", active = false, inf
     const blob = new Blob([icsData], { type: 'text/calendar' }); // Create a Blob object with the correct MIME type
     const url = URL.createObjectURL(blob); // Create a URL for the Blob object
 
-    // Open the URL in a new tab
-    window.open(url, '_blank');
-  };
+    // Create a temporary anchor element
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title} FMC Events.ics`;
+    document.body.appendChild(a); // Append the anchor to the body
+    a.click(); // Programmatically click the anchor
+    document.body.removeChild(a); // Remove the anchor from the body
 
-  
+    // Revoke the Blob URL to free up resources
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Box onClick={() => showCalendar && setShowCalendar(false)} marginBottom={theme.spacing[1]} width={width}>
