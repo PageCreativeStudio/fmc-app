@@ -44,7 +44,6 @@ const Calendar = () => {
 
     const formattedEvents = events.map((x) => {
       let indexColor = eventsCategories.findIndex((category) => {
-        console.log(x);
         if (!x.acf.category) return false
         return category.name === x.acf.category[0].name
       });
@@ -54,7 +53,7 @@ const Calendar = () => {
         start: x.acf.date_from, 
         end: x.acf.date_to, 
         time: x.acf.time, 
-        endTime: x.acf.time_end ? x.acf.time_end : null,
+        endTime: x.acf.time_end, 
         image: x.acf.image ? x.acf.image.url : null,
         description: x.acf.description ? x.acf.description : null,
         eventCategory: x.acf.category && x.acf.category[0].name, 
@@ -134,11 +133,10 @@ const Calendar = () => {
             image={indvidualEvent.image}
             title={indvidualEvent.name}
             date={formatDate(indvidualEvent.start)}
-            dateEnd={indvidualEvent.end ? formatDate(indvidualEvent.end) : ""}
+            dateEnd={indvidualEvent.end && formatDate(indvidualEvent.end)}
             time={indvidualEvent.time}
             colour={indvidualEvent.color}
             description={indvidualEvent.description}
-            timeEnd={indvidualEvent.endTime}
           />
         </>
         :  
