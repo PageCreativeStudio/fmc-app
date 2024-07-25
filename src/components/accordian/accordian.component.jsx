@@ -6,12 +6,12 @@ import cal from '../../assets/images/calendar.png'
 import minus from '../../assets/svgs/minus';
 import plus from '../../assets/svgs/plus';
 import { InfoPopup } from '../info-popup';
-import { Events, EventsWrapper, Link, SmallText, Text, TextBold, Circle } from '../info-card/info-card.styles';
+import { Events, EventsWrapper, Link, SmallText,Text, TextBold, Circle } from '../info-card/info-card.styles';
 import formatDate from '../../helpers/format-date';
 
 const Accordian = ({theme, title, children, width="100%", active = false, infoBox, events}) => {
 
-  // setup active state to track if accordian is active so we can conditionally set css styles
+  // setup active state to track if accordian is active so we can conditonally set css styles
   const [isActive, setIsActive] = useState(active);
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -35,19 +35,17 @@ const Accordian = ({theme, title, children, width="100%", active = false, infoBo
 
   useEffect(() => {
     if(!filteredEvents) return
-    const calendarInstance = window.ics();
+    const calendarInstace = window.ics();
     console.log(filteredEvents)
     filteredEvents.forEach(event => {
-      calendarInstance.addEvent(event.acf.title, event.acf.description, "", `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`);
+      calendarInstace.addEvent(event.acf.title, event.acf.description, "", `${event.acf.date_from} ${event.acf.time ? event.acf.time : '00:00'}`, `${event.acf.date_to ? event.acf.date_to : event.acf.date_from} ${event.acf.time_end ? event.acf.time_end : '00:00'}`);
     });
-    setCalendar(calendarInstance)
+    setCalendar(calendarInstace)
   }, [filteredEvents])
   
   const onDownloadClick = () => {
-    if (!calendar) return;
-    
-    const downloadLink = calendar.download(`${title} FMC Events`);
-    window.open(downloadLink, '_blank');
+    if (!calendar) return
+    calendar.download(`${title} FMC Events`);
   }
 
   return (
