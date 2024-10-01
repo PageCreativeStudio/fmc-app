@@ -111,7 +111,7 @@ END:VCALENDAR`.trim();
             <Events show={showCalendar} style={{ padding: "1rem 2rem" }}>
               {filteredEvents.map((event) => (
                 <Flex marginBottom="0.5rem" key={event.id} justifyContent="space-between" alignItems="center">
-                  <Flex style={{ maxWidth: "26rem", marginRight: "3rem" }}>
+                  <Flex style={{ maxWidth: "24rem", marginRight: "3rem" }}>
                     <Circle color={event.acf.category[0]?.acf.colour} />
                     <Flex flexDirection="column">
                       <SmallText style={{ fontSize: "14px", color: "Black", paddingBottom: "6px" }} primary={false}>{`${formatDate(event.acf.date_from)} ${event.acf.time}`}</SmallText>
