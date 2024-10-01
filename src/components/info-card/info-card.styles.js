@@ -81,7 +81,8 @@ const eventsStyling = (props) => css`
   transition: 0.3s;
   opacity: ${props.show ? '1' : '0'};
   position: absolute;
-  width: 24rem;
+  width: 100%;
+  max-width: 42rem;
   top: calc(100% + 0.5rem);
   left: 0;
   border-radius: 0rem 0rem 1rem 1rem;
@@ -104,11 +105,27 @@ const linkStyling = (props) => css`
   }
 `
 
+const downloadButtonStyling = (props) => css`
+  display: flex;
+  align-items: center;
 
+   svg{
+    background:linear-gradient(180deg, #E23734 0%, #981614 100%);
+  }
 
+  svg {
+    width: 6rem;
+    height: 5rem;
+    margin-right: 0.5rem;
 
+    @media (max-width: 767px) {
+      width: 7rem;
+      height: 4rem;
+    }
+  }
+`;
 
-
+export const DownloadButton = styled(Flex)(downloadButtonStyling);
 export const Wrapper = styled(Flex)(wrapperStyling);
 export const EventsWrapper = styled(Flex)(eventsWrapperStyling);
 export const Events = styled.div(eventsStyling);
