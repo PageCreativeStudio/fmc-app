@@ -109,7 +109,7 @@ const downloadButtonStyling = (props) => css`
   display: flex;
   align-items: center;
 
-   svg{
+   svg rect{
     background:linear-gradient(180deg, #E23734 0%, #981614 100%);
   }
 
