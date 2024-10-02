@@ -111,6 +111,7 @@ const downloadButtonStyling = (props) => css`
 
    svg{ 
     background:linear-gradient(180deg, #E23734 0%, #981614 100%);
+    border-radius:4px;
   }
 
   svg {
