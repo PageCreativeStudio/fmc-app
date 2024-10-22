@@ -154,19 +154,19 @@ END:VCALENDAR`.trim();
           &times;
         </button>
         <Flex justifyContent="space-between" alignItems="center">
-          <SmallText style={{ fontSize: "16px", color: "black", paddingBottom: "6px", paddingRight: "50px" }}>
+          <SmallText style={{ fontSize: "16px", color: "black", paddingBottom: "6px", paddingRight: "50px", margin: "-33px 0 0 0" }}>
             {`${formatDate(event.acf.date_from)} ${event.acf.time}`}
           </SmallText>
           <button
             style={{ display: "block", background: "none", height: "7rem", border: "none" }}
             onClick={handleDownload}
           >
-            <div style={{ marginTop: "-1rem", width: "6rem", height: "6rem", display: "flex", cursor:"pointer" }}>
+            <div style={{ marginTop: "-5rem", width: "6rem", height: "6rem", display: "flex", cursor:"pointer" }}>
               <DownloadIcon />
             </div>
           </button>
         </Flex>
-        <h2 style={{ fontSize: "14px", maxWidth: "31rem", fontWeight: 500, marginTop: "-9px" }}>{event.post_title}</h2>
+        <h2 style={{ fontSize: "14px", maxWidth: "31rem", fontWeight: 500, marginTop: "-3rem" }}>{event.post_title}</h2>
       </div>
     </div>
   );
