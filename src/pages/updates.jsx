@@ -110,57 +110,54 @@ END:VCALENDAR`.trim();
 
 
     const handlePrint = () => {
+        // Create print window
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert('Please allow pop-ups to print the events.');
+            return;
+        }
+
         const printContent = `
+            <!DOCTYPE html>
             <html>
                 <head>
-                    <title>Print Events</title>
+                    <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Print Events</title>
                     <style>
-                        @page {
-                            size: A4;
-                            margin: 20mm 15mm;
-                        }
                         body { 
                             font-family: Arial, sans-serif;
-                            margin: 0;
                             padding: 20px;
-                            background: white;
+                            margin: 0;
                         }
                         h1 { 
                             text-align: center;
-                            color: #000;
                             margin-bottom: 30px;
                         }
                         .event { 
                             margin: 20px 0; 
                             border-bottom: 1px solid #cccccc; 
-                            padding-bottom: 10px;
-                            page-break-inside: avoid;
+                            padding-bottom: 10px; 
                         }
                         .event-title { 
                             font-weight: bold; 
-                            font-size: 20px;
-                            color: #000;
-                            margin-bottom: 10px;
+                            font-size: 20px; 
                         }
                         .event-date { 
                             font-size: 15px; 
-                            color: #555;
-                            margin-bottom: 15px;
+                            color: #555; 
                         }
                         .event-description { 
                             font-size: 17px; 
                             font-weight: 200; 
                             line-height: 1.5;
-                            color: #555;
+                            color: #555; 
                         }
                         @media print {
                             body { 
-                                -webkit-print-color-adjust: exact;
-                                print-color-adjust: exact;
-                            }
-                            .event {
-                                break-inside: avoid;
+                                width: 100%;
+                                margin: 0;
+                                padding: 15px;
                             }
                         }
                     </style>
@@ -186,37 +183,21 @@ END:VCALENDAR`.trim();
                             ` : ''}
                         </div>
                     `).join('') || '<p>No events available.</p>'}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 500);
+                        }
+                    </script>
                 </body>
             </html>
         `;
 
-        // Create a hidden iframe with proper size
-        const printFrame = document.createElement('iframe');
-        printFrame.style.position = 'fixed';
-        printFrame.style.right = '0';
-        printFrame.style.bottom = '0';
-        printFrame.style.width = '0';
-        printFrame.style.height = '0';
-        printFrame.style.border = 'none';
-        document.body.appendChild(printFrame);
-
-        // Write content to iframe
-        const doc = printFrame.contentWindow.document;
-        doc.open();
-        doc.write(printContent);
-        doc.close();
-
-        // Print after ensuring content is loaded
-        printFrame.onload = () => {
-            setTimeout(() => {
-                printFrame.contentWindow.focus();
-                printFrame.contentWindow.print();
-                // Remove frame after print dialog closes
-                setTimeout(() => {
-                    document.body.removeChild(printFrame);
-                }, 100);
-            }, 250);
-        };
+        // Write to the new window and trigger print
+        printWindow.document.write(printContent);
+        printWindow.document.close();
     };
 
 
