@@ -32,7 +32,7 @@ const Modal = ({ show, onClose, event }) => {
     },
     content: {
       background: "white",
-      padding: "4px 25px 20px 25px",
+      padding: "20px 25px 20px 25px",
       borderRadius: "8px",
       maxWidth: "50rem",
       width: "100%",
