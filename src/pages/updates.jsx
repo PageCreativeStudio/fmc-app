@@ -6,6 +6,7 @@ import { Loading } from "../components/loading";
 import { useEffectOnce } from "../hooks/use-effect-once";
 import { withTheme } from "@emotion/react";
 import DownloadIcon from '../assets/svgs/download-event';
+import PrintIcon from '../assets/svgs/print';
 import { Image, Wrapper, Title, Text, ContentWrapper, OverflowWrapper } from "../components/event-info/event-info.styles";
 
 const getOrdinalSuffix = (day) => {
@@ -190,7 +191,7 @@ END:VCALENDAR`.trim();
                                             cursor: "pointer" 
                                         }}
                                     >
-                                        Print
+                                        <PrintIcon />
                                     </button>
                                 )}
                             </H1Title>
