@@ -34,7 +34,7 @@ const Modal = ({ show, onClose, event }) => {
       background: "white",
       padding: "20px 25px",
       borderRadius: "8px",
-      maxWidth: "46rem",
+      maxWidth: "50rem",
       width: "100%",
       position: "relative",
       zIndex: "99",
@@ -166,7 +166,7 @@ END:VCALENDAR`.trim();
             </div>
           </button>
         </Flex>
-        <h2 style={{ fontSize: "14px", maxWidth: "31rem", fontWeight: 500, marginTop: "-4px" }}>{event.post_title}</h2>
+        <h2 style={{ fontSize: "14px", maxWidth: "31rem", fontWeight: 500, marginTop: "-16px" }}>{event.post_title}</h2>
       </div>
     </div>
   );
@@ -199,7 +199,7 @@ const CorporateMembership = () => {
         <>
           <H1Title>{corporateMembers.acf && corporateMembers.acf.title}</H1Title>
           {corporateMembers.acf && corporateMembers.acf.benefits && (
-            <div style={{ fontSize: "18px", fontWeight: "500", padding: "0 5px", lineHeight: "30px" }}
+            <div style={{ fontSize: "1.8rem", fontWeight: "400", padding: "0 5px", lineHeight: "30px" }}
               dangerouslySetInnerHTML={{
                 __html: corporateMembers.acf.benefits,
               }}
