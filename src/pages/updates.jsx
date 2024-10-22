@@ -108,28 +108,61 @@ END:VCALENDAR`.trim();
     // Current date and time for comparison
     const currentDate = new Date();
 
-    
-    const handlePrint = () => {
-        const printWindow = document.createElement('iframe');
-        printWindow.style.position = 'absolute';
-        printWindow.style.width = '0';
-        printWindow.style.height = '0';
-        printWindow.style.border = 'none';
-        document.body.appendChild(printWindow);
 
-        const doc = printWindow.contentWindow.document;
-        doc.open();
-        doc.write(`
+    const handlePrint = () => {
+        const printContent = `
             <html>
                 <head>
                     <title>Print Events</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <style>
-                        body { font-family: Arial, sans-serif; }
-                        h1 { text-align: center; }
-                        .event { margin: 20px; border-bottom: 1px solid #cccccc; padding-bottom: 10px; }
-                        .event-title { font-weight: bold; font-size: 20px; }
-                        .event-date { font-size: 15px; color: #555; }
-                        .event-description { font-size: 17px; font-weight: 200; line-height: 1.5;color: #555; }
+                        @page {
+                            size: A4;
+                            margin: 20mm 15mm;
+                        }
+                        body { 
+                            font-family: Arial, sans-serif;
+                            margin: 0;
+                            padding: 20px;
+                            background: white;
+                        }
+                        h1 { 
+                            text-align: center;
+                            color: #000;
+                            margin-bottom: 30px;
+                        }
+                        .event { 
+                            margin: 20px 0; 
+                            border-bottom: 1px solid #cccccc; 
+                            padding-bottom: 10px;
+                            page-break-inside: avoid;
+                        }
+                        .event-title { 
+                            font-weight: bold; 
+                            font-size: 20px;
+                            color: #000;
+                            margin-bottom: 10px;
+                        }
+                        .event-date { 
+                            font-size: 15px; 
+                            color: #555;
+                            margin-bottom: 15px;
+                        }
+                        .event-description { 
+                            font-size: 17px; 
+                            font-weight: 200; 
+                            line-height: 1.5;
+                            color: #555;
+                        }
+                        @media print {
+                            body { 
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                            }
+                            .event {
+                                break-inside: avoid;
+                            }
+                        }
                     </style>
                 </head>
                 <body>
@@ -147,23 +180,43 @@ END:VCALENDAR`.trim();
                                 ` : ''}
                             </div>
                             ${event.description ? `
-                            <div class="event-description">
-                                <span>${event.description.replace(/<\/?[^>]+(>|$)/g, " ")}</span>
-                            </div>
-                        ` : ''}
+                                <div class="event-description">
+                                    <span>${event.description.replace(/<\/?[^>]+(>|$)/g, " ")}</span>
+                                </div>
+                            ` : ''}
                         </div>
                     `).join('') || '<p>No events available.</p>'}
                 </body>
             </html>
-        `);
+        `;
+
+        // Create a hidden iframe with proper size
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'fixed';
+        printFrame.style.right = '0';
+        printFrame.style.bottom = '0';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = 'none';
+        document.body.appendChild(printFrame);
+
+        // Write content to iframe
+        const doc = printFrame.contentWindow.document;
+        doc.open();
+        doc.write(printContent);
         doc.close();
 
-        // Print the content after a short delay to ensure it's fully loaded
-        setTimeout(() => {
-            printWindow.contentWindow.focus();
-            printWindow.contentWindow.print();
-            document.body.removeChild(printWindow); 
-        }, 200);
+        // Print after ensuring content is loaded
+        printFrame.onload = () => {
+            setTimeout(() => {
+                printFrame.contentWindow.focus();
+                printFrame.contentWindow.print();
+                // Remove frame after print dialog closes
+                setTimeout(() => {
+                    document.body.removeChild(printFrame);
+                }, 100);
+            }, 250);
+        };
     };
 
 
@@ -178,17 +231,17 @@ END:VCALENDAR`.trim();
                             <H1Title>
                                 CALENDAR EVENT UPDATES LOG
                                 {updates.acf.updated_events && updates.acf.updated_events.length > 0 && (
-                                    <button 
-                                        onClick={handlePrint} 
-                                        style={{ 
-                                            marginLeft: "1rem", 
-                                            border: "none", 
-                                            background: "none", 
-                                            textDecoration: "underline", 
-                                            color: "#e23734", 
-                                            fontSize: "19px", 
-                                            textDecorationOffset: "4px", 
-                                            cursor: "pointer" 
+                                    <button
+                                        onClick={handlePrint}
+                                        style={{
+                                            marginLeft: "1rem",
+                                            border: "none",
+                                            background: "none",
+                                            textDecoration: "underline",
+                                            color: "#e23734",
+                                            fontSize: "19px",
+                                            textDecorationOffset: "4px",
+                                            cursor: "pointer"
                                         }}
                                     >
                                         <PrintIcon />
@@ -215,11 +268,11 @@ END:VCALENDAR`.trim();
                             } else {
                                 eventEndDate.setHours(0, 0, 0, 0);
                             }
-    
+
                             const hasPassed = eventEndDate < new Date();
-    
+
                             if (hasPassed) return null;
-    
+
                             return (
                                 <Wrapper key={index} style={{ borderTop: "solid 1px #bbbbbb", maxWidth: "88rem" }}>
                                     {event.image && <Image backgroundImage={event.image} />}
