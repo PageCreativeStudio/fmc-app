@@ -32,7 +32,7 @@ const Modal = ({ show, onClose, event }) => {
     },
     content: {
       background: "white",
-      padding: "20px 25px",
+      padding: "4px 25px 20px 25px",
       borderRadius: "8px",
       maxWidth: "50rem",
       width: "100%",
@@ -161,12 +161,12 @@ END:VCALENDAR`.trim();
             style={{ display: "block", background: "none", height: "7rem", border: "none" }}
             onClick={handleDownload}
           >
-            <div style={{ marginTop: "-2rem", width: "6rem", height: "6rem", display: "flex", cursor:"pointer" }}>
+            <div style={{ marginTop: "-1rem", width: "6rem", height: "6rem", display: "flex", cursor:"pointer" }}>
               <DownloadIcon />
             </div>
           </button>
         </Flex>
-        <h2 style={{ fontSize: "14px", maxWidth: "31rem", fontWeight: 500, marginTop: "-16px" }}>{event.post_title}</h2>
+        <h2 style={{ fontSize: "14px", maxWidth: "31rem", fontWeight: 500, marginTop: "-9px" }}>{event.post_title}</h2>
       </div>
     </div>
   );
