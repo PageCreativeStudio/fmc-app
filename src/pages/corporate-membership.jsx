@@ -7,8 +7,20 @@ import { Loading } from "../components/loading";
 import { useEffectOnce } from "../hooks/use-effect-once";
 import cal from '../assets/images/calendar.png';
 import DownloadIcon from '../assets/svgs/download-event';
+import PrintIcon from '../assets/svgs/print';
 import { SmallText } from '../components/info-card/info-card.styles';
 import formatDate from '../helpers/format-date';
+
+// Helper function to format event date
+const formatEventDate = (date) => {
+  if (!date) return '';
+  return formatDate(date);
+};
+
+// Helper function to check if event is available
+const isEventAvailable = (event) => {
+  return event && event.title; // Add more conditions if needed
+};
 
 // Modal Component for displaying event details
 const Modal = ({ show, onClose, event }) => {
@@ -53,8 +65,8 @@ const Modal = ({ show, onClose, event }) => {
       fontFamily: "auto",
       height: "24px",
       width: "24px",
-      maxWidth:"24px",
-      padding:"0",
+      maxWidth: "24px",
+      padding: "0",
       lineHeight: "0",
       border: "solid 1px",
     },
@@ -161,7 +173,7 @@ END:VCALENDAR`.trim();
             style={{ display: "block", background: "none", height: "7rem", border: "none" }}
             onClick={handleDownload}
           >
-            <div style={{ marginTop: "-5rem", width: "6rem", height: "6rem", display: "flex", cursor:"pointer" }}>
+            <div style={{ marginTop: "-5rem", width: "6rem", height: "6rem", display: "flex", cursor: "pointer" }}>
               <DownloadIcon />
             </div>
           </button>
@@ -191,6 +203,103 @@ const CorporateMembership = () => {
     setIsModalOpen(false);
   };
 
+  const handlePrint = () => {
+    // Get events from corporateMembers instead of updates
+    const availableEvents = corporateMembers?.acf?.events?.filter(event => event.post_title);
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow pop-ups to print the events.');
+      return;
+    }
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Events For Corporates</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              margin: 0;
+            }
+            h1 { 
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            .event { 
+              margin: 20px 0; 
+              border-bottom: 1px solid #cccccc; 
+              padding-bottom: 10px; 
+            }
+            .event-title { 
+              font-weight: bold; 
+              font-size: 20px; 
+            }
+            .event-date { 
+              font-size: 15px; 
+              color: #555; 
+            }
+            .event-description { 
+              font-size: 17px; 
+              font-weight: 200; 
+              line-height: 1.5;
+              color: #555; 
+            }
+            @media print {
+              body { 
+                width: 100%;
+                margin: 0;
+                padding: 15px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Events For Corporates</h1>
+          ${availableEvents?.length > 0
+            ? availableEvents.map(event => `
+              <div class="event">
+                <div class="event-title">${event.post_title}</div>
+                <div class="event-date">
+                  ${event.acf?.date_from ? `
+                    <span style="font-size: 15px; padding-right: 3rem; font-weight: 700; margin-bottom: 15px;">
+                      ${formatEventDate(event.acf.date_from)}
+                      ${event.acf.date_to ? ` - ${formatEventDate(event.acf.date_to)}` : ''}
+                      ${event.acf.time || event.acf.time_end ? ` | ${event.acf.time}${event.acf.time_end ? ` - ${event.acf.time_end}` : ''}` : ''}
+                    </span>
+                  ` : ''}
+                </div>
+                ${event.acf?.description ? `
+                  <div class="event-description">
+                    <span>${event.acf.description.replace(/<\/?[^>]+(>|$)/g, " ")}</span>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')
+            : '<p>No upcoming events available.</p>'}
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() {
+                window.close();
+              }, 500);
+            }
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+
+  // Check for available events from corporateMembers instead of updates
+  const hasAvailableEvents = corporateMembers?.acf?.events?.length > 0;
+
   return (
     <>
       {!corporateMembers ? (
@@ -199,11 +308,54 @@ const CorporateMembership = () => {
         <>
           <H1Title>{corporateMembers.acf && corporateMembers.acf.title}</H1Title>
           {corporateMembers.acf && corporateMembers.acf.benefits && (
-            <div style={{ fontSize: "1.8rem", fontWeight: "400", padding: "0 5px", lineHeight: "30px" }}
+            <div
+              id="acf-benefits-content"
+              style={{
+                fontSize: "1.8rem",
+                fontWeight: "400",
+                padding: "0 5px",
+                lineHeight: "30px",
+              }}
               dangerouslySetInnerHTML={{
-                __html: corporateMembers.acf.benefits,
+                __html: `
+        <style>
+          #acf-benefits-content li {
+            margin-bottom: 4px;
+            list-style: disc;
+            margin-left: 2rem;
+          }
+          #acf-benefits-content b, #acf-benefits-content strong {
+            font-weight: 700;
+          }
+        </style>
+        ${corporateMembers.acf.benefits} `,
               }}
             />
+          )}
+
+
+
+          {corporateMembers.acf && corporateMembers.acf.events_title && (
+            <h2 style={{ fontSize: "27px", fontWeight: "800", margin: "3rem 3px 0px" }}>
+              {corporateMembers.acf.events_title}
+              {hasAvailableEvents && (
+                <button
+                  onClick={handlePrint}
+                  style={{
+                    marginLeft: "1rem",
+                    border: "none",
+                    background: "none",
+                    textDecoration: "underline",
+                    color: "#e23734",
+                    fontSize: "19px",
+                    textDecorationOffset: "4px",
+                    cursor: "pointer"
+                  }}
+                >
+                  <PrintIcon />
+                </button>
+              )}
+            </h2>
           )}
 
           {corporateMembers.acf && corporateMembers.acf.events && (
@@ -251,3 +403,8 @@ const CorporateMembership = () => {
 };
 
 export default CorporateMembership;
+
+
+
+
+
