@@ -5,44 +5,37 @@ import { withTheme } from "@emotion/react";
 
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
 
+  // Format date and time to ICS format
   const formatICSDate = (date, time) => {
     const dateObj = new Date(date);
-  
     if (time) {
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (timeParts) {
         let hours = parseInt(timeParts[1], 10);
         const minutes = parseInt(timeParts[2], 10);
         const period = timeParts[3].toLowerCase();
-        if (period === "pm" && hours !== 12) hours += 12;
+        if (period === 'pm' && hours !== 12) hours += 12;
         dateObj.setHours(hours, minutes);
-      } else {
-        console.error(`Failed to parse time: ${time}`);
       }
     } else {
-      // Set to 00:00 local time if no time is provided
       dateObj.setHours(0, 0, 0, 0);
     }
-  
+
     const year = dateObj.getFullYear();
     const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
     const day = dateObj.getDate().toString().padStart(2, '0');
     const hours = dateObj.getHours().toString().padStart(2, '0');
     const minutes = dateObj.getMinutes().toString().padStart(2, '0');
     const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-    
+
     return `${year}${month}${day}T${hours}${minutes}${seconds}`;
   };
 
-  const generateCalendarData = (startDate, endDate, startTime, endTime) => {
+  // Generate ICS file for a single event
+  const generateCalendarData = (startDate, endDate, startTime, endTime, title, description) => {
     const formattedStartDate = formatICSDate(startDate, startTime);
-    let formattedEndDate;
-    if (endDate) {
-      formattedEndDate = formatICSDate(endDate, endTime || startTime); // Use start time if end time is not provided
-    } else {
-      formattedEndDate = formatICSDate(startDate, endTime || startTime); // Use start time if end time is not provided
-    }
-    
+    const formattedEndDate = formatICSDate(endDate || startDate, endTime || startTime); // Use start time if end time is not provided
+
     const calendarData = `
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -54,7 +47,7 @@ DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR`.trim();
-    
+
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
   };
