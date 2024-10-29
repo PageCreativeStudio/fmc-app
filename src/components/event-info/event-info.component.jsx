@@ -193,7 +193,8 @@ END:VCALENDAR`.trim();
               style={{ 
                 color: "#e23734", 
                 fontWeight: 400,
-                padding: "8px 0",  // Larger touch target
+                padding: "8px 0", 
+                textDecoration: "underline 2px #e23734", 
                 display: "inline-block"
               }}
             >
