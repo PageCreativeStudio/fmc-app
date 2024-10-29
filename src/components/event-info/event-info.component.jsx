@@ -59,55 +59,11 @@ END:VCALENDAR`.trim();
     return window.URL.createObjectURL(blob);
   };
 
-  const handleDownload = () => {
-    const startDateString = date ? date.split(" ") : [];
-    const endDateString = dateEnd ? dateEnd.split(" ") : [];
-    const months = {
-      January: '01',
-      February: '02',
-      March: '03',
-      April: '04',
-      May: '05',
-      June: '06',
-      July: '07',
-      August: '08',
-      September: '09',
-      October: '10',
-      November: '11',
-      December: '12',
-    };
-
-    let startDateStringWithoutTime;
-    let endDateStringWithoutTime;
-
-    if (startDateString.length === 4) {
-      startDateStringWithoutTime = `${startDateString[3]}-${months[startDateString[2]]}-${startDateString[1].slice(0, -2)}`;
-    } else if (startDateString.length === 5) {
-      const startTime = startDateString[4].split(":");
-      startDateStringWithoutTime = `${startDateString[3]}-${months[startDateString[2]]}-${startDateString[1].slice(0, -2)}T${startTime[0].padStart(2, '0')}${startTime[1].padStart(2, '0')}`;
-    }
-
-    if (endDateString.length === 4) {
-      endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}`;
-    } else if (endDateString.length === 5) {
-      const endTime = endDateString[4].split(":");
-      endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
-    } else {
-      console.warn("No end date provided for event. Using start date as end date.");
-      endDateStringWithoutTime = startDateStringWithoutTime;
-    }
-
-    if (endDateStringWithoutTime) {
-      const calendarDataUrl = generateCalendarData(
-        new Date(startDateStringWithoutTime),
-        new Date(endDateStringWithoutTime),
-        time,
-        timeEnd
-      );
-      window.open(calendarDataUrl, '_blank');
-    } else {
-      console.warn("No end date provided for event.");
-    }
+  // Handle download for each event
+  const handleDownload = (event) => {
+    const { date_from, date_to, time, time_end, title, description } = event.acf;
+    const calendarDataUrl = generateCalendarData(date_from, date_to, time, time_end, title, description);
+    window.open(calendarDataUrl, '_blank');
   };
 
   return (
