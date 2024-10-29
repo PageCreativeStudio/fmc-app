@@ -20,7 +20,6 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         console.error(`Failed to parse time: ${time}`);
       }
     } else {
-      // Set to 00:00 local time if no time is provided
       dateObj.setHours(0, 0, 0, 0);
     }
   
@@ -38,9 +37,9 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     const formattedStartDate = formatICSDate(startDate, startTime);
     let formattedEndDate;
     if (endDate) {
-      formattedEndDate = formatICSDate(endDate, endTime || startTime); // Use start time if end time is not provided
+      formattedEndDate = formatICSDate(endDate, endTime || startTime);
     } else {
-      formattedEndDate = formatICSDate(startDate, endTime || startTime); // Use start time if end time is not provided
+      formattedEndDate = formatICSDate(startDate, endTime || startTime);
     }
     
     const calendarData = `
@@ -51,7 +50,7 @@ BEGIN:VEVENT
 SUMMARY:${title}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
-DESCRIPTION:${description || ""}
+DESCRIPTION:${description || " "}
 END:VEVENT
 END:VCALENDAR`.trim();
     
@@ -126,7 +125,7 @@ END:VCALENDAR`.trim();
         {(date || time) && <Text>{date && date} {time && <>, {time}</>} {timeEnd && <> - {timeEnd}</>} {dateEnd && <> - {dateEnd}</>}</Text>}
         {title && <Title><Flex paddingRight={theme.spacing[2]} alignItems="start"><Circle colour={colour} /> {title}</Flex></Title>}
         {description && <OverflowWrapper scroll={image ? "scroll" : "auto"} height={image ? "8rem" : "auto"}><Text dangerouslySetInnerHTML={{ __html: description.replace(/<a\b([^>]*)>(.*?)<\/a>/g, '<a style="font-size: inherit; text-decoration: underline 2px #e23734; text-underline-offset: 2px;" $1>$2</a>') }} /></OverflowWrapper>}
-        <Flex><Text style={{ marginTop: "1.5rem", fonSize: "19px", textDecoration: "underline 2px #e23734", textUnderlineOffset: "5px" }}><a style={{ color: "#e23734", fontWeight: 400 }} href="#" onClick={handleDownload}>iCal Download</a></Text></Flex>
+        <Flex><Text style={{ marginTop: "1.5rem", fonSize: "19px", textDecoration: "underline 2px #e23734", textUnderlineOffset: "5px" }}><a style={{ color: "#e23734", fontWeight: 400 }} href="#" onClick={(e) => { e.preventDefault(); handleDownload(); }}>iCal Download</a></Text></Flex>
       </ContentWrapper>
     </Wrapper>
   );
