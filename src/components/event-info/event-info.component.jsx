@@ -39,39 +39,28 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`; // Added Z to indicate UTC
   };
 
-  const generateCalendarData = (startDate, endDate, startTime, endTime) => {
-    const formattedStartDate = formatICSDate(startDate, startTime);
-    let formattedEndDate;
-    if (endDate) {
-      formattedEndDate = formatICSDate(endDate, endTime || startTime);
-    } else {
-      // If no end date/time provided, set end time to 1 hour after start
-      const defaultEnd = new Date(startDate);
-      defaultEnd.setHours(defaultEnd.getHours() + 1);
-      formattedEndDate = formatICSDate(defaultEnd, endTime || startTime);
-    }
-    
-    // Properly formatted iCal data with required fields and line endings
-    const calendarData = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Anthropic Event Calendar//EN',
-      'CALSCALE:GREGORIAN',
-      'METHOD:PUBLISH',
-      'BEGIN:VEVENT',
-      `UID:${new Date().getTime()}@anthropic.com`,
-      `DTSTAMP:${formatICSDate(new Date())}`,
-      `DTSTART:${formattedStartDate}`,
-      `DTEND:${formattedEndDate}`,
-      `SUMMARY:${title.replace(/[,;\\]/g, match => '\\' + match)}`,
-      description ? `DESCRIPTION:${description.replace(/[,;\\]/g, match => '\\' + match).replace(/(?:\r\n|\r|\n)/g, '\\n')}` : '',
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].filter(Boolean).join('\r\n');
-    
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
-  };
+const generateCalendarData = (startDate, endDate, startTime, endTime) => {
+  const formattedStartDate = formatICSDate(startDate, startTime);
+  let formattedEndDate;
+  if (endDate) {
+    formattedEndDate = formatICSDate(endDate, endTime || startTime);
+  } else {
+    formattedEndDate = formatICSDate(startDate, endTime || startTime);
+  }
+  
+  const calendarData = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:${title}
+DTSTART:${formattedStartDate}
+DTEND:${formattedEndDate}
+DESCRIPTION:${description || ""}
+END:VEVENT
+END:VCALENDAR`.trim();
+  
+  const blob = new Blob([calendarData], { type: 'text/calendar' });
+  return window.URL.createObjectURL(blob);
+};
 
   const handleDownload = () => {
     const startDateString = date ? date.split(" ") : [];
