@@ -4,53 +4,66 @@ import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, B
 import { withTheme } from "@emotion/react";
 
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
-
   const formatICSDate = (date, time) => {
     const dateObj = new Date(date);
+  
     if (time) {
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (timeParts) {
         let hours = parseInt(timeParts[1], 10);
         const minutes = parseInt(timeParts[2], 10);
         const period = timeParts[3].toLowerCase();
-        if (period === 'pm' && hours !== 12) hours += 12;
+        if (period === "pm" && hours !== 12) hours += 12;
+        if (period === "am" && hours === 12) hours = 0;
         dateObj.setHours(hours, minutes);
+      } else {
+        console.error(`Failed to parse time: ${time}`);
       }
     } else {
       dateObj.setHours(0, 0, 0, 0);
     }
-
-    const year = dateObj.getFullYear();
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-    const day = dateObj.getDate().toString().padStart(2, '0');
-    const hours = dateObj.getHours().toString().padStart(2, '0');
-    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-    const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-
-    return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+  
+    return dateObj.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   };
 
   const generateCalendarData = (startDate, endDate, startTime, endTime) => {
     const formattedStartDate = formatICSDate(startDate, startTime);
-    const formattedEndDate = formatICSDate(endDate || startDate, endTime || startTime);
-
-    const calendarData = `
-BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:CALENDAR
-BEGIN:VEVENT
-SUMMARY:${title}
-DTSTART:${formattedStartDate}
-DTEND:${formattedEndDate}
-DESCRIPTION:${description || ""}
-END:VEVENT
-END:VCALENDAR`.trim();
-
-    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-    return window.URL.createObjectURL(blob);
+    let formattedEndDate;
+    if (endDate) {
+      formattedEndDate = formatICSDate(endDate, endTime || startTime);
+    } else {
+      // If no end date/time, set end time to 1 hour after start time
+      const endDateObj = new Date(startDate);
+      endDateObj.setHours(endDateObj.getHours() + 1);
+      formattedEndDate = formatICSDate(endDateObj, endTime || startTime);
+    }
+    
+    // Escape special characters in title and description
+    const escapedTitle = title.replace(/[\\,;]/g, '\\$&');
+    const escapedDescription = (description || '')
+      .replace(/\n/g, '\\n')
+      .replace(/[\\,;]/g, '\\$&')
+      .replace(/<[^>]*>/g, ''); // Remove HTML tags
+    
+    const calendarData = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//CALENDAR//EN',
+      'BEGIN:VEVENT',
+      `SUMMARY:${escapedTitle}`,
+      `DTSTART:${formattedStartDate}`,
+      `DTEND:${formattedEndDate}`,
+      `DESCRIPTION:${escapedDescription}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+    
+    return calendarData;
   };
 
-  const handleDownload = () => {
+  const handleDownload = (e) => {
+    e.preventDefault();
+    
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
     const months = {
@@ -83,15 +96,40 @@ END:VCALENDAR`.trim();
     } else if (endDateString.length === 5) {
       const endTime = endDateString[4].split(":");
       endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
+    } else {
+      endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    const calendarDataUrl = generateCalendarData(
-      new Date(startDateStringWithoutTime),
-      endDateStringWithoutTime ? new Date(endDateStringWithoutTime) : null,
-      time,
-      timeEnd
-    );
-    window.open(calendarDataUrl, '_blank');
+    if (startDateStringWithoutTime) {
+      const calendarData = generateCalendarData(
+        new Date(startDateStringWithoutTime),
+        endDateStringWithoutTime ? new Date(endDateStringWithoutTime) : null,
+        time,
+        timeEnd
+      );
+
+      // Detect iOS devices
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // For iOS devices, create a data URI
+        const encodedData = encodeURIComponent(calendarData);
+        window.location.href = `data:text/calendar;charset=utf8,${encodedData}`;
+      } else {
+        // For other devices, use Blob and download
+        const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } else {
+      console.warn("No valid date provided for event.");
+    }
   };
 
   return (
