@@ -34,11 +34,15 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     return `${year}${month}${day}T${hours}${minutes}${seconds}`;
   };
 
-  // Generate ICS file for a single event
-  const generateCalendarData = (startDate, endDate, startTime, endTime, title, description) => {
+  const generateCalendarData = (startDate, endDate, startTime, endTime) => {
     const formattedStartDate = formatICSDate(startDate, startTime);
-    const formattedEndDate = formatICSDate(endDate || startDate, endTime || startTime);
-
+    let formattedEndDate;
+    if (endDate) {
+      formattedEndDate = formatICSDate(endDate, endTime || startTime); // Use start time if end time is not provided
+    } else {
+      formattedEndDate = formatICSDate(startDate, endTime || startTime); // Use start time if end time is not provided
+    }
+    
     const calendarData = `
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -50,7 +54,7 @@ DTEND:${formattedEndDate}
 DESCRIPTION:${description || ""}
 END:VEVENT
 END:VCALENDAR`.trim();
-
+    
     const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
     return window.URL.createObjectURL(blob);
   };
