@@ -106,26 +106,21 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     } else if (endDateString.length === 5) {
       const endTime = endDateString[4].split(":");
       endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
+    } else {
+      console.warn("No end date provided for event. Using start date as end date.");
+      endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    try {
+    if (endDateStringWithoutTime) {
       const calendarDataUrl = generateCalendarData(
         new Date(startDateStringWithoutTime),
-        endDateStringWithoutTime ? new Date(endDateStringWithoutTime) : null,
+        new Date(endDateStringWithoutTime),
         time,
         timeEnd
       );
-      
-      // Create temporary link and trigger download
-      const link = document.createElement('a');
-      link.href = calendarDataUrl;
-      link.setAttribute('download', `${title.replace(/[^a-z0-9]/gi, '_')}.ics`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(calendarDataUrl);
-    } catch (error) {
-      console.error("Error generating calendar file:", error);
+      window.open(calendarDataUrl, '_blank');
+    } else {
+      console.warn("No end date provided for event.");
     }
   };
 
