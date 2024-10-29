@@ -4,9 +4,10 @@ import { Image, Wrapper, Title, Text, Circle, ContentWrapper, OverflowWrapper, B
 import { withTheme } from "@emotion/react";
 
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
+
   const formatICSDate = (date, time) => {
     const dateObj = new Date(date);
-
+  
     if (time) {
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (timeParts) {
@@ -14,56 +15,51 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
         const minutes = parseInt(timeParts[2], 10);
         const period = timeParts[3].toLowerCase();
         if (period === "pm" && hours !== 12) hours += 12;
-        if (period === "am" && hours === 12) hours = 0;
         dateObj.setHours(hours, minutes);
       } else {
         console.error(`Failed to parse time: ${time}`);
       }
     } else {
+      // Set to 00:00 local time if no time is provided
       dateObj.setHours(0, 0, 0, 0);
     }
-
-    return dateObj.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  
+    const year = dateObj.getFullYear();
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const hours = dateObj.getHours().toString().padStart(2, '0');
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+    
+    return `${year}${month}${day}T${hours}${minutes}${seconds}`;
   };
 
   const generateCalendarData = (startDate, endDate, startTime, endTime) => {
     const formattedStartDate = formatICSDate(startDate, startTime);
     let formattedEndDate;
     if (endDate) {
-      formattedEndDate = formatICSDate(endDate, endTime || startTime);
+      formattedEndDate = formatICSDate(endDate, endTime || startTime); // Use start time if end time is not provided
     } else {
-      // If no end date/time, set end time to 1 hour after start time
-      const endDateObj = new Date(startDate);
-      endDateObj.setHours(endDateObj.getHours() + 1);
-      formattedEndDate = formatICSDate(endDateObj, endTime || startTime);
+      formattedEndDate = formatICSDate(startDate, endTime || startTime); // Use start time if end time is not provided
     }
-
-    // Escape special characters in title andd escription
-    const escapedTitle = title.replace(/[\\,;]/g, '\\$&');
-    const escapedDescription = (description || '')
-      .replace(/\n/g, '\\n')
-      .replace(/[\\,;]/g, '\\$&')
-      .replace(/<[^>]*>/g, ''); // Remove HTML tags
-
-    const calendarData = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//CALENDAR//EN',
-      'BEGIN:VEVENT',
-      `SUMMARY:${escapedTitle}`,
-      `DTSTART:${formattedStartDate}`,
-      `DTEND:${formattedEndDate}`,
-      `DESCRIPTION:${escapedDescription}`,
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].join('\r\n');
-
-    return calendarData;
+    
+    const calendarData = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:CALENDAR
+BEGIN:VEVENT
+SUMMARY:${title}
+DTSTART:${formattedStartDate}
+DTEND:${formattedEndDate}
+DESCRIPTION:${description || ""}
+END:VEVENT
+END:VCALENDAR`.trim();
+    
+    const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+    return window.URL.createObjectURL(blob);
   };
 
-  const handleDownload = (e) => {
-    e.preventDefault();
-
+  const handleDownload = () => {
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
     const months = {
@@ -97,39 +93,22 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       const endTime = endDateString[4].split(":");
       endDateStringWithoutTime = `${endDateString[3]}-${months[endDateString[2]]}-${endDateString[1].slice(0, -2)}T${endTime[0].padStart(2, '0')}${endTime[1].padStart(2, '0')}`;
     } else {
+      console.warn("No end date provided for event. Using start date as end date.");
       endDateStringWithoutTime = startDateStringWithoutTime;
     }
 
-    if (startDateStringWithoutTime) {
-      const calendarData = generateCalendarData(
+    if (endDateStringWithoutTime) {
+      const calendarDataUrl = generateCalendarData(
         new Date(startDateStringWithoutTime),
-        endDateStringWithoutTime ? new Date(endDateStringWithoutTime) : null,
+        new Date(endDateStringWithoutTime),
         time,
         timeEnd
       );
-
-      // Detect iOS devices
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-      if (isIOS) {
-        // For iOS devices, create a data URI and open in new tab
-        const encodedData = encodeURIComponent(calendarData);
-        window.open(`data:text/calendar;charset=utf8,${encodedData}`, '_blank');
-      } else {
-        // For other devices, use Blob and open in new tab
-        const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        // Clean up the blob URL after a short delay
-        setTimeout(() => {
-          window.URL.revokeObjectURL(url);
-        }, 100);
-      }
+      window.open(calendarDataUrl, '_blank');
     } else {
-      console.warn("No valid date provided for event.");
+      console.warn("No end date provided for event.");
     }
   };
-
 
   return (
     <Wrapper colour={colour}>
