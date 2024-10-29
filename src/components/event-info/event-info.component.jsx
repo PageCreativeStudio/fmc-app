@@ -6,7 +6,7 @@ import { withTheme } from "@emotion/react";
 const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, image, colour = theme.colors.primary, onClick }) => {
   const formatICSDate = (date, time) => {
     const dateObj = new Date(date);
-  
+
     if (time) {
       const timeParts = time.match(/(\d+):(\d+)\s*([ap]m)/i);
       if (timeParts) {
@@ -22,7 +22,7 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
     } else {
       dateObj.setHours(0, 0, 0, 0);
     }
-  
+
     return dateObj.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   };
 
@@ -37,14 +37,14 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       endDateObj.setHours(endDateObj.getHours() + 1);
       formattedEndDate = formatICSDate(endDateObj, endTime || startTime);
     }
-    
-    // Escape special characters in title and description
+
+    // Escape special characters in title andd escription
     const escapedTitle = title.replace(/[\\,;]/g, '\\$&');
     const escapedDescription = (description || '')
       .replace(/\n/g, '\\n')
       .replace(/[\\,;]/g, '\\$&')
       .replace(/<[^>]*>/g, ''); // Remove HTML tags
-    
+
     const calendarData = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -57,13 +57,13 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
       'END:VEVENT',
       'END:VCALENDAR'
     ].join('\r\n');
-    
+
     return calendarData;
   };
 
   const handleDownload = (e) => {
     e.preventDefault();
-    
+
     const startDateString = date ? date.split(" ") : [];
     const endDateString = dateEnd ? dateEnd.split(" ") : [];
     const months = {
@@ -110,27 +110,26 @@ const EventInfo = ({ theme, title, date, dateEnd, time, timeEnd, description, im
 
       // Detect iOS devices
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      
+
       if (isIOS) {
-        // For iOS devices, create a data URI
+        // For iOS devices, create a data URI and open in new tab
         const encodedData = encodeURIComponent(calendarData);
-        window.location.href = `data:text/calendar;charset=utf8,${encodedData}`;
+        window.open(`data:text/calendar;charset=utf8,${encodedData}`, '_blank');
       } else {
-        // For other devices, use Blob and download
+        // For other devices, use Blob and open in new tab
         const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        window.open(url, '_blank');
+        // Clean up the blob URL after a short delay
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+        }, 100);
       }
     } else {
       console.warn("No valid date provided for event.");
     }
   };
+
 
   return (
     <Wrapper colour={colour}>
